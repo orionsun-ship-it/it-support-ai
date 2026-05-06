@@ -11,9 +11,13 @@ __pycache__/
 venv/
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
 
 # Vector store
 chroma_db/
+.local_chroma/
 
 # IT Ops API runtime data
 services/it_ops_api/it_ops.db
@@ -21,12 +25,9 @@ services/it_ops_api/it_ops.db-journal
 services/it_ops_api/it_ops.db-shm
 services/it_ops_api/it_ops.db-wal
 
-# Old (deprecated) MCP runtime data — kept ignored in case stale files linger
-mcp_server/data/tickets.json
-
 # Frontend
 node_modules/
-dist/
+frontend/dist/
 .vite/
 
 # Editor
@@ -37,6 +38,5 @@ dist/
 # Logs and test artifacts
 *.log
 !services/it_ops_api/sample_logs/*.log
-!mcp_server/sample_logs/*.log
-tests/results/*.json
+tests/results/
 !tests/results/.gitkeep

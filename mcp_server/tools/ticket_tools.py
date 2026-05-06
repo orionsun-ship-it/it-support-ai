@@ -1,6 +1,2 @@
-"""DEPRECATED — superseded by services.it_ops_api (SQLModel-backed)."""
-
-raise RuntimeError(
-    "mcp_server.tools.ticket_tools is deprecated. "
-    "Use services.it_ops_api.main instead."
-)
+# Deprecated. Use mcp_server.tools (the package __init__) for tool defs and
+# mcp_server.store for storage helpers.

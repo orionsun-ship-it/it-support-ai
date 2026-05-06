@@ -1,58 +1,72 @@
-"""Escalation agent — applies escalation rules and bumps the ticket if needed."""
+"""Escalation agent — gated by explicit rules and produces a specific response."""
 
 from __future__ import annotations
-
-import re
 
 from backend.services.it_ops_client import ItOpsClient
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-ESCALATION_KEYWORDS = re.compile(
-    r"\b(urgent|critical|emergency|asap|immediately|cannot work|can't work|outage|"
-    r"data loss|production down)\b",
-    re.IGNORECASE,
-)
-
 
 def _should_escalate(state: dict) -> bool:
-    confidence = float(state.get("confidence") or 0.0)
-    user_message = state.get("user_message") or ""
-    category = state.get("category") or "other"
-    severity = state.get("severity") or "medium"
-    urgency = state.get("urgency") or "medium"
-
-    if ESCALATION_KEYWORDS.search(user_message):
+    if state.get("match_strength") in {"weak", "none"} and state.get(
+        "is_support_request", True
+    ):
         return True
-    if severity == "critical" or urgency == "high":
+    if state.get("severity") == "critical":
         return True
-    if confidence < 0.4:
+    if state.get("urgency") == "high":
         return True
-    if category == "hardware" and confidence < 0.6:
+    if state.get("automation_status") in {"failed", "manual_required"}:
         return True
-    if state.get("match_strength") == "none" and state.get("is_support_request", True):
+    if float(state.get("confidence") or 0.0) < 0.55 and state.get(
+        "is_support_request", True
+    ):
         return True
     return False
 
 
 class EscalationAgent:
-    """Decides whether a turn should be escalated to a human IT technician."""
+    """Handles unresolved, urgent, low-confidence, or failed-automation cases."""
 
     def __init__(self, client: ItOpsClient | None = None) -> None:
         self.client = client or ItOpsClient()
 
-    def run(self, state: dict) -> dict:
-        escalated = _should_escalate(state)
-        state["escalated"] = bool(escalated)
+    def _ensure_ticket(self, state: dict) -> dict | None:
+        ticket = state.get("ticket")
+        if ticket:
+            return ticket
+        # Open a ticket so escalation has something concrete to reference.
+        payload = {
+            "title": (state.get("user_message") or "Escalation")[:60],
+            "description": state.get("user_message") or "",
+            "category": state.get("category") or "other",
+            "priority": "critical",
+            "severity": state.get("severity") or "high",
+            "urgency": state.get("urgency") or "high",
+            "session_id": state.get("session_id") or "unknown",
+        }
+        result = self.client.create_ticket(payload, fallback=True)
+        state["ticket"] = result.ticket
+        state["ops_api_unavailable"] = result.is_fallback
+        state["should_create_ticket"] = True
+        state.setdefault(
+            "ticket_decision_reason", "escalation requires a ticket"
+        )
+        return result.ticket
 
-        if not escalated:
+    def run(self, state: dict) -> dict:
+        state.setdefault("route_trace", []).append("escalation")
+
+        if not _should_escalate(state):
+            state["escalated"] = False
             return state
 
-        ticket = state.get("ticket") or {}
-        ticket_id = ticket.get("ticket_id")
+        ticket = self._ensure_ticket(state) or {}
+        ticket_id = ticket.get("ticket_id", "")
         new_priority = "critical"
 
+        # Bump priority + status if this ticket lives in the real ops API.
         if ticket_id and not str(ticket_id).startswith("LOCAL-"):
             updated = self.client.update_status(ticket_id, "escalated")
             if updated:
@@ -61,21 +75,22 @@ class EscalationAgent:
             if bumped:
                 state["ticket"] = bumped
         elif ticket:
-            # Local fallback — update in place.
             ticket["status"] = "escalated"
             ticket["priority"] = new_priority
             state["ticket"] = ticket
 
-        existing = state.get("response") or ""
+        state["escalated"] = True
+
+        existing = (state.get("response") or "").rstrip()
         ticket_phrase = (
-            f"Ticket {ticket_id} is now {new_priority} priority."
+            f"Ticket {ticket_id} has been opened with priority {new_priority}."
             if ticket_id
-            else "A new ticket will be opened at critical priority."
+            else f"A new ticket has been opened with priority {new_priority}."
         )
         banner = (
-            f"\n\n⚠️ This issue has been escalated to a human IT technician. "
-            f"{ticket_phrase} Expected response time: 2-4 hours."
+            "I could not resolve this confidently from the knowledge base, so I "
+            f"routed it to human IT support. {ticket_phrase} Expected response "
+            "time: 2-4 hours."
         )
-        state["response"] = existing + banner
-
+        state["response"] = (existing + "\n\n" + banner).strip() if existing else banner
         return state

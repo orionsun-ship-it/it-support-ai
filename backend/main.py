@@ -193,11 +193,17 @@ def chat(payload: UserMessage) -> AgentResponse:
         confidence=confidence,
         severity=state.get("severity"),
         urgency=state.get("urgency"),
+        category=state.get("category"),
+        intent=state.get("intent"),
         action_taken=automation_result,
         ticket_id=ticket_id,
         escalated=escalated,
         match_strength=state.get("match_strength"),
         sources=sources,
+        route_trace=list(state.get("route_trace") or []),
+        final_route=state.get("final_route"),
+        ticket_decision_reason=state.get("ticket_decision_reason"),
+        automation_status=state.get("automation_status"),
     )
 
 

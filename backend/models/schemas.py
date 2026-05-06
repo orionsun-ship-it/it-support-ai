@@ -8,10 +8,33 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-Category = Literal["password", "software", "hardware", "network", "access", "other"]
+Category = Literal[
+    "password",
+    "access",
+    "software",
+    "hardware",
+    "network",
+    "email",
+    "vpn",
+    "security",
+    "other",
+]
 Priority = Literal["low", "medium", "high", "critical"]
 Severity = Literal["low", "medium", "high", "critical"]
 Urgency = Literal["low", "medium", "high"]
+Intent = Literal[
+    "knowledge_question",
+    "password_reset",
+    "account_unlock",
+    "software_license_check",
+    "software_install",
+    "access_request",
+    "vpn_log_check",
+    "ticket_request",
+    "status_check",
+    "non_support",
+    "unknown",
+]
 
 
 class UserMessage(BaseModel):
@@ -42,11 +65,17 @@ class AgentResponse(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     severity: Optional[Severity] = None
     urgency: Optional[Urgency] = None
+    category: Optional[str] = None
+    intent: Optional[str] = None
     action_taken: Optional[str] = None
     ticket_id: Optional[str] = None
     escalated: bool = False
     match_strength: Optional[Literal["strong", "weak", "none"]] = None
     sources: List[KBSource] = Field(default_factory=list)
+    route_trace: List[str] = Field(default_factory=list)
+    final_route: Optional[str] = None
+    ticket_decision_reason: Optional[str] = None
+    automation_status: Optional[str] = None
 
 
 class TicketCreate(BaseModel):
@@ -55,14 +84,14 @@ class TicketCreate(BaseModel):
     title: str
     description: str
     priority: Priority
-    category: Category
+    category: str
     severity: Severity = "medium"
     urgency: Urgency = "medium"
     session_id: str
 
 
 class TicketResponse(TicketCreate):
-    """A ticket as returned by the IT Ops API — extends TicketCreate with server fields."""
+    """A ticket as returned by the IT Ops API."""
 
     ticket_id: str
     status: str
@@ -83,8 +112,6 @@ class ConversationTurn(BaseModel):
 
 
 class SessionState(BaseModel):
-    """In-memory state for a single user session."""
-
     session_id: str
     history: List[ConversationTurn] = Field(default_factory=list)
     current_ticket: Optional[TicketResponse] = None
@@ -92,8 +119,6 @@ class SessionState(BaseModel):
 
 
 class SystemMetrics(BaseModel):
-    """High-level system metrics returned by GET /metrics."""
-
     total_requests: int
     avg_response_time_ms: float
     total_tickets: int

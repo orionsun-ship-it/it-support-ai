@@ -31,7 +31,7 @@ Do not include step-by-step troubleshooting. Keep it short.
 
 
 class KnowledgeAgent:
-    """Retrieves KB chunks then asks Claude Haiku to write the answer."""
+    """Retrieves KB chunks and writes a grounded or honest no-match answer."""
 
     def __init__(self) -> None:
         settings = get_settings()
@@ -43,6 +43,8 @@ class KnowledgeAgent:
         self.retriever = KnowledgeRetriever()
 
     def run(self, state: dict) -> dict:
+        state.setdefault("route_trace", []).append("knowledge")
+
         user_message = state.get("user_message", "")
         intent = state.get("intent") or ""
         category = state.get("category") or "other"
@@ -93,10 +95,8 @@ class KnowledgeAgent:
                 "KnowledgeAgent LLM call failed (%s): %s", type(exc).__name__, exc
             )
             content = (
-                "I couldn't reach Claude just now. This usually means the "
-                "ANTHROPIC_API_KEY in your .env is missing or invalid — check "
-                "the backend logs for the exact error. I'll route this to a "
-                "human if you'd like."
+                "I couldn't reach Claude just now. Check the backend logs for the "
+                "exact error. I'll route this to a human if you'd like."
             )
 
         state["response"] = content

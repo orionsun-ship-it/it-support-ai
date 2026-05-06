@@ -149,6 +149,20 @@ class ItOpsClient:
             logger.warning("ops-api unreachable for priority update: %s", exc)
             return None
 
+    def analyze_logs(self, service: str = "network_events") -> dict:
+        """Best-effort log analysis — returns the dict the ops API produces, or
+        a minimal placeholder if unreachable."""
+        try:
+            resp = self._request(
+                "POST",
+                "/api/v1/logs/analyze",
+                json={"log_file": service, "last_n_lines": 20},
+            )
+            return resp.json()
+        except httpx.RequestError as exc:
+            logger.warning("ops-api unreachable for analyze_logs: %s", exc)
+            return {"summary": "Log analyzer offline; manual check required."}
+
     def is_available(self, timeout: float = 2.0) -> bool:
         try:
             with httpx.Client(timeout=timeout) as client:

@@ -1,10 +1,21 @@
-"""DEPRECATED — this module has been replaced by services.it_ops_api.main.
+"""Entrypoint for the Model Context Protocol server.
 
-Importing or running it now raises an error. Run the new ops API with:
+Run over stdio (the standard MCP transport):
 
-    uvicorn services.it_ops_api.main:app --port 8001 --reload
+    python -m mcp_server.server
+
+Connect from VS Code Copilot Chat (.vscode/mcp.json) or Claude Desktop
+(claude_desktop_config.json). See docs/MCP_VSCode_Demo.md for full configs.
 """
 
-raise RuntimeError(
-    "mcp_server.server is deprecated. Use services.it_ops_api.main instead."
-)
+from __future__ import annotations
+
+from mcp_server.tools import mcp
+
+
+def main() -> None:
+    mcp.run()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,11 +1,9 @@
-"""End-to-end accuracy harness.
+"""End-to-end accuracy harness for the routed agent pipeline.
 
-Runs every scenario in test_scenarios.json through the orchestrator and writes
-a summary report to tests/results/. The ops API is mocked out so this script
-does NOT require a running services.it_ops_api process — it only needs the
-ANTHROPIC_API_KEY and a seeded vector store.
+Mocks the IT Ops API client so the harness does not need the ops API to be
+running. Calls the real Claude model via langchain-anthropic. Writes a
+timestamped report to tests/results/.
 
-Usage:
     python tests/test_accuracy.py
 """
 
@@ -29,8 +27,8 @@ RESULTS_DIR = Path(__file__).parent / "results"
 
 
 # ---------------------------------------------------------------------------
-# Patch the ops client BEFORE importing the orchestrator, so the singleton
-# WorkflowAgent/EscalationAgent use the mock.
+# Patch the ops client BEFORE importing the orchestrator so the singletons use
+# the mock.
 # ---------------------------------------------------------------------------
 
 
@@ -64,6 +62,9 @@ def _patch_client() -> None:
     }
     ItOpsClient.list_tickets = lambda self, **kw: []  # type: ignore[assignment]
     ItOpsClient.is_available = lambda self, timeout=2.0: True  # type: ignore[assignment]
+    ItOpsClient.analyze_logs = lambda self, service="network_events": {  # type: ignore[assignment]
+        "summary": "VPN authentication errors detected; investigate ASAP."
+    }
 
 
 _patch_client()
@@ -77,44 +78,73 @@ def _load_scenarios() -> list[dict]:
 def _evaluate(scenario: dict, state: dict) -> dict[str, Any]:
     actual_category = state.get("category")
     expected_category = scenario.get("expected_category")
-    ticket = state.get("ticket") or {}
-    has_ticket = bool(ticket.get("ticket_id"))
+    has_ticket = bool(state.get("should_create_ticket"))
     escalated = bool(state.get("escalated"))
-    response_text = (state.get("response") or "").lower()
-    keywords = scenario.get("expected_kb_keywords") or []
-    kw_hits = [kw for kw in keywords if kw.lower() in response_text]
+    final_route = state.get("final_route")
+    automation_status = state.get("automation_status")
 
     checks = {
-        "category_match": actual_category == expected_category if expected_category else True,
-        "is_support_request_match": (
-            state.get("is_support_request") == scenario["expect_is_support_request"]
-            if "expect_is_support_request" in scenario
+        "category_match": (
+            actual_category == expected_category if expected_category else True
+        ),
+        "ticket_match": has_ticket == bool(scenario.get("expected_ticket")),
+        "escalation_match": escalated == bool(scenario.get("expected_escalation")),
+        "final_route_match": (
+            final_route == scenario["expected_final_route"]
+            if "expected_final_route" in scenario
             else True
         ),
-        "ticket_match": has_ticket == bool(scenario.get("expect_ticket")),
-        "escalation_match": escalated == bool(scenario.get("expect_escalation")),
-        "kb_keyword_hit": (len(kw_hits) > 0) if keywords else True,
+        "automation_status_match": (
+            automation_status == scenario["expected_automation_status"]
+            if "expected_automation_status" in scenario
+            else True
+        ),
     }
+
     return {
         "id": scenario["id"],
-        "user_message": scenario["user_message"],
+        "user_message": scenario["message"],
         "expected_category": expected_category,
         "actual_category": actual_category,
         "is_support_request": state.get("is_support_request"),
         "match_strength": state.get("match_strength"),
         "severity": state.get("severity"),
         "urgency": state.get("urgency"),
-        "expect_ticket": bool(scenario.get("expect_ticket")),
-        "actual_ticket_id": ticket.get("ticket_id"),
-        "ticket_decision_reason": state.get("ticket_decision_reason"),
-        "expect_escalation": bool(scenario.get("expect_escalation")),
+        "intent": state.get("intent"),
+        "expected_ticket": bool(scenario.get("expected_ticket")),
+        "actual_ticket": has_ticket,
+        "actual_ticket_id": (state.get("ticket") or {}).get("ticket_id"),
+        "expected_escalation": bool(scenario.get("expected_escalation")),
         "actual_escalation": escalated,
+        "expected_final_route": scenario.get("expected_final_route"),
+        "actual_final_route": final_route,
+        "route_trace": state.get("route_trace"),
+        "automation_status": automation_status,
+        "expected_automation_status": scenario.get("expected_automation_status"),
+        "ticket_decision_reason": state.get("ticket_decision_reason"),
         "response_time_ms": float(state.get("response_time_ms") or 0.0),
-        "kb_keywords_expected": keywords,
-        "kb_keywords_hit": kw_hits,
         "checks": checks,
         "passed": all(checks.values()),
         "response_excerpt": (state.get("response") or "")[:240],
+    }
+
+
+def _aggregate(results: list[dict]) -> dict:
+    n = len(results) or 1
+    counts = {"category": 0, "ticket": 0, "escalation": 0, "final_route": 0, "auto": 0}
+    for r in results:
+        c = r.get("checks", {})
+        counts["category"] += int(c.get("category_match", False))
+        counts["ticket"] += int(c.get("ticket_match", False))
+        counts["escalation"] += int(c.get("escalation_match", False))
+        counts["final_route"] += int(c.get("final_route_match", False))
+        counts["auto"] += int(c.get("automation_status_match", False))
+    return {
+        "category_accuracy": counts["category"] / n,
+        "ticket_accuracy": counts["ticket"] / n,
+        "escalation_accuracy": counts["escalation"] / n,
+        "route_accuracy": counts["final_route"] / n,
+        "automation_accuracy": counts["auto"] / n,
     }
 
 
@@ -130,7 +160,7 @@ def main() -> int:
         print(f"  - {sc['id']}: ", end="", flush=True)
         try:
             state = process_message(
-                user_message=sc["user_message"],
+                user_message=sc["message"],
                 session_id=f"test-{sc['id']}",
                 history=[],
             )
@@ -138,7 +168,7 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001
             evaluated = {
                 "id": sc["id"],
-                "user_message": sc["user_message"],
+                "user_message": sc["message"],
                 "passed": False,
                 "error": str(exc),
             }
@@ -147,12 +177,14 @@ def main() -> int:
 
     total = len(results)
     passed = sum(1 for r in results if r.get("passed"))
+    aggregate = _aggregate(results)
     summary = {
         "timestamp": datetime.now().isoformat(),
         "total": total,
         "passed": passed,
         "failed": total - passed,
         "pass_rate": (passed / total) if total else 0.0,
+        "aggregate": aggregate,
         "results": results,
     }
 
@@ -161,6 +193,8 @@ def main() -> int:
     out_path.write_text(json.dumps(summary, indent=2))
 
     print(f"\n{passed}/{total} scenarios passed ({summary['pass_rate'] * 100:.1f}%)")
+    for k, v in aggregate.items():
+        print(f"  {k:22s} {v * 100:.1f}%")
     print(f"Wrote report to {out_path}")
     return 0 if passed == total else 1
 

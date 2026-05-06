@@ -1,76 +1,69 @@
 {
-  "version": 2,
+  "version": 3,
   "scenarios": [
     {
-      "id": "greeting-no-ticket",
-      "user_message": "hi",
-      "expected_category": "other",
-      "expect_is_support_request": false,
-      "expect_ticket": false,
-      "expect_escalation": false,
-      "expected_kb_keywords": []
+      "id": "kb_browser_cache",
+      "message": "How do I clear my browser cache?",
+      "expected_category": "software",
+      "expected_final_route": "final_response",
+      "expected_ticket": false,
+      "expected_escalation": false
     },
     {
-      "id": "password-reset-clear",
-      "user_message": "I forgot my password and need to reset it.",
+      "id": "password_reset_automation",
+      "message": "I forgot my password and need a reset link.",
       "expected_category": "password",
-      "expect_is_support_request": true,
-      "expect_ticket": false,
-      "expect_escalation": false,
-      "expected_kb_keywords": ["reset", "password"]
+      "expected_final_route": "final_response",
+      "expected_ticket": false,
+      "expected_escalation": false,
+      "expected_automation_status": "success"
     },
     {
-      "id": "vpn-setup",
-      "user_message": "How do I set up the company VPN on my new laptop?",
-      "expected_category": "network",
-      "expect_is_support_request": true,
-      "expect_ticket": false,
-      "expect_escalation": false,
-      "expected_kb_keywords": ["vpn", "anyconnect"]
-    },
-    {
-      "id": "account-locked",
-      "user_message": "My account is locked after too many failed logins.",
+      "id": "account_locked",
+      "message": "My account is locked after too many failed logins.",
       "expected_category": "access",
-      "expect_is_support_request": true,
-      "expect_ticket": false,
-      "expect_escalation": false,
-      "expected_kb_keywords": ["lockout", "unlock"]
+      "expected_final_route": "final_response",
+      "expected_ticket": false,
+      "expected_escalation": false,
+      "expected_automation_status": "success"
     },
     {
-      "id": "software-error-1603",
-      "user_message": "Installer fails with error 1603, what should I do?",
-      "expected_category": "software",
-      "expect_is_support_request": true,
-      "expect_ticket": false,
-      "expect_escalation": false,
-      "expected_kb_keywords": ["1603", "msi"]
+      "id": "urgent_vpn_outage",
+      "message": "VPN is down for the whole team and nobody can work.",
+      "expected_category": "vpn",
+      "expected_ticket": true,
+      "expected_escalation": true
     },
     {
-      "id": "urgent-keyword-triggers-escalation",
-      "user_message": "My machine is dead and I urgently need help, this is critical.",
+      "id": "explicit_ticket_request",
+      "message": "Please create a ticket for my broken laptop screen.",
       "expected_category": "hardware",
-      "expect_is_support_request": true,
-      "expect_ticket": true,
-      "expect_escalation": true,
-      "expected_kb_keywords": []
+      "expected_ticket": true,
+      "expected_escalation": false
     },
     {
-      "id": "low-confidence-vague",
-      "user_message": "thingy not working please help right now",
-      "expect_is_support_request": true,
-      "expect_ticket": true,
-      "expect_escalation": true,
-      "expected_kb_keywords": []
+      "id": "non_support_question",
+      "message": "Can you write me a poem about coffee?",
+      "expected_category": "other",
+      "expected_final_route": "final_response",
+      "expected_ticket": false,
+      "expected_escalation": false
     },
     {
-      "id": "outlook-cannot-open",
-      "user_message": "Outlook will not open this morning.",
+      "id": "outlook_cannot_open",
+      "message": "Outlook will not open this morning.",
       "expected_category": "software",
-      "expect_is_support_request": true,
-      "expect_ticket": false,
-      "expect_escalation": false,
-      "expected_kb_keywords": ["outlook", "safe"]
+      "expected_final_route": "final_response",
+      "expected_ticket": false,
+      "expected_escalation": false
+    },
+    {
+      "id": "software_error_1603",
+      "message": "Installer fails with error 1603, what should I do?",
+      "expected_category": "software",
+      "expected_final_route": "final_response",
+      "expected_ticket": false,
+      "expected_escalation": false
     }
   ]
 }

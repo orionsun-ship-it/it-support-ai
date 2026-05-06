@@ -609,3 +609,92 @@ function TicketGlyph() {
     </svg>
   );
 }
+
+function RouteTrace({ trace, decisionReason, automationStatus, category, intent }) {
+  const nodes = Array.isArray(trace) ? trace : [];
+  return (
+    <div
+      style={{
+        maxWidth: '84%',
+        background: 'var(--surface-soft)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-md)',
+        padding: '10px 14px',
+        fontSize: 12,
+        color: 'var(--text-secondary)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10.5,
+          fontWeight: 600,
+          color: 'var(--text-muted)',
+          letterSpacing: 0.6,
+          textTransform: 'uppercase',
+        }}
+      >
+        Agent route
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+        {nodes.map((node, i) => (
+          <span key={`${node}-${i}`} style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <span
+              className="mono"
+              style={{
+                padding: '2px 7px',
+                borderRadius: 5,
+                background: node === 'escalation' ? 'var(--red-soft)' : '#eef2ff',
+                color: node === 'escalation' ? '#991b1b' : '#1e40af',
+                fontSize: 11,
+                fontWeight: 500,
+              }}
+            >
+              {node}
+            </span>
+            {i < nodes.length - 1 && (
+              <span style={{ margin: '0 4px', color: 'var(--text-muted)' }}>→</span>
+            )}
+          </span>
+        ))}
+      </div>
+      {(category || intent) && (
+        <div style={{ fontSize: 11.5 }}>
+          {category && (
+            <span>
+              category:{' '}
+              <span className="mono" style={{ color: 'var(--text)' }}>
+                {category}
+              </span>
+            </span>
+          )}
+          {category && intent && <span style={{ color: 'var(--text-muted)' }}>{' · '}</span>}
+          {intent && (
+            <span>
+              intent:{' '}
+              <span className="mono" style={{ color: 'var(--text)' }}>
+                {intent}
+              </span>
+            </span>
+          )}
+        </div>
+      )}
+      {automationStatus && automationStatus !== 'not_needed' && (
+        <div style={{ fontSize: 11.5 }}>
+          automation:{' '}
+          <span className="mono" style={{ color: 'var(--text)' }}>
+            {automationStatus}
+          </span>
+        </div>
+      )}
+      {decisionReason && (
+        <div style={{ fontSize: 11.5 }}>
+          ticket decision:{' '}
+          <span style={{ color: 'var(--text-secondary)' }}>{decisionReason}</span>
+        </div>
+      )}
+    </div>
+  );
+}

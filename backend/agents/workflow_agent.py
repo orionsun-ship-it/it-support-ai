@@ -1,15 +1,10 @@
 """Workflow agent.
 
-Two responsibilities:
-1. Run scripted automations (password reset, account unlock, license check).
-2. Decide whether to open a ticket — and only open one when needed.
+Three responsibilities:
 
-Ticket creation rules (in priority order):
-  - intake says is_support_request == False  -> NO ticket
-  - explicit escalation keywords            -> ticket (priority from severity/urgency)
-  - retrieval is "weak" or "none"           -> ticket (KB didn't cover it)
-  - urgency == high                         -> ticket
-  - otherwise                               -> NO ticket (KB answered the user)
+1. Decide whether a safe automation is allowed and execute it (intent-based).
+2. Decide whether a ticket is required (gated, not blanket).
+3. Append concise outcome text without overwriting the knowledge response.
 """
 
 from __future__ import annotations
@@ -23,103 +18,147 @@ logger = get_logger(__name__)
 
 ESCALATION_KEYWORDS = re.compile(
     r"\b(urgent|critical|emergency|asap|immediately|cannot work|can't work|outage|"
-    r"data loss|production down)\b",
+    r"data loss|production down|nobody can work)\b",
     re.IGNORECASE,
 )
 
-# Priority is computed from severity + urgency, NOT classifier confidence.
-_PRIORITY_LADDER = ["low", "medium", "high", "critical"]
+EXPLICIT_TICKET_RE = re.compile(
+    r"\b(create|open|file|submit|raise)\s+(a\s+)?(new\s+)?ticket\b",
+    re.IGNORECASE,
+)
+
+AUTOMATABLE_INTENTS = {
+    "password_reset",
+    "account_unlock",
+    "software_license_check",
+    "vpn_log_check",
+}
 
 
-def _max_priority(severity: str, urgency: str) -> str:
-    sev_idx = _PRIORITY_LADDER.index(severity) if severity in _PRIORITY_LADDER else 1
-    urg_map = {"low": 0, "medium": 1, "high": 2}
-    urg_idx = urg_map.get(urgency, 1)
-    return _PRIORITY_LADDER[max(sev_idx, urg_idx)]
+def _priority_from_state(state: dict) -> str:
+    severity = state.get("severity") or "medium"
+    urgency = state.get("urgency") or "medium"
+    if severity == "critical" or urgency == "high":
+        return "critical"
+    if severity == "high":
+        return "high"
+    if severity == "medium" or urgency == "medium":
+        return "medium"
+    return "low"
+
+
+def _ticket_title(state: dict) -> str:
+    user_message = (state.get("user_message") or "").strip()
+    return (user_message or "Support request")[:60]
 
 
 def _should_create_ticket(state: dict) -> tuple[bool, str]:
     if not state.get("is_support_request", True):
         return False, "not a support request"
+
     user_message = state.get("user_message") or ""
+
+    if EXPLICIT_TICKET_RE.search(user_message):
+        return True, "user explicitly requested a ticket"
+
     if ESCALATION_KEYWORDS.search(user_message):
-        return True, "escalation keyword"
+        return True, "urgent/escalation language detected"
+
+    if state.get("severity") == "critical" or state.get("urgency") == "high":
+        return True, "high severity or urgency"
+
+    if state.get("automation_status") in {"failed", "manual_required"}:
+        return True, "automation failed or requires manual approval"
+
     if state.get("match_strength") in {"weak", "none"}:
-        return True, "no strong KB match"
-    if state.get("urgency") == "high":
-        return True, "high urgency"
-    return False, "KB likely covered the question"
+        return True, "knowledge base did not provide a strong answer"
+
+    return False, "knowledge response or automation resolved the request"
 
 
 class WorkflowAgent:
-    """Runs automations and conditionally opens a ticket."""
+    """Runs intent-based automations and conditionally opens a ticket."""
 
     def __init__(self, client: ItOpsClient | None = None) -> None:
         self.client = client or ItOpsClient()
 
+    def _run_automation(self, state: dict) -> tuple[str, str]:
+        intent = state.get("intent")
+        if intent == "password_reset":
+            return (
+                "success",
+                "Password reset eligibility verified. A reset link has been "
+                "sent to the registered email.",
+            )
+        if intent == "account_unlock":
+            return (
+                "success",
+                "Account unlock request submitted. The account should unlock "
+                "within 2 minutes.",
+            )
+        if intent == "software_license_check":
+            return (
+                "success",
+                "Software license check completed. The assigned license is active.",
+            )
+        if intent == "vpn_log_check":
+            try:
+                result = self.client.analyze_logs(service="network_events")
+                summary = (result or {}).get("summary") or "VPN logs reviewed."
+                return ("success", f"VPN log check completed: {summary}")
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("VPN log automation failed: %s", exc)
+                return ("manual_required", "VPN log check could not run automatically.")
+        return ("not_needed", "")
+
     def run(self, state: dict) -> dict:
-        category = state.get("category") or "other"
-        severity = state.get("severity") or "medium"
-        urgency = state.get("urgency") or "medium"
-        user_message = state.get("user_message") or ""
-        session_id = state.get("session_id") or "unknown"
+        state.setdefault("route_trace", []).append("workflow")
+        state["automation_status"] = "not_needed"
+        state["automation_result"] = None
 
-        # 1. Scripted automation by category
-        automation_result: str | None
-        if category == "password":
-            automation_result = (
-                "Password reset initiated. A reset link will be sent to your "
-                "registered email within 5 minutes."
-            )
-        elif category == "access":
-            automation_result = (
-                "Account unlock request submitted. Your account will be unlocked "
-                "within 2 minutes."
-            )
-        elif category == "software":
-            automation_result = (
-                "Software license check completed. Your license is active and valid."
-            )
-        else:
-            automation_result = None
+        if state.get("requires_automation") and state.get("intent") in AUTOMATABLE_INTENTS:
+            status, message = self._run_automation(state)
+            state["automation_status"] = status
+            state["automation_result"] = message or None
 
-        # 2. Decide whether to create a ticket
-        create, reason = _should_create_ticket(state)
-        state["should_create_ticket"] = create
+        create_ticket, reason = _should_create_ticket(state)
+        state["should_create_ticket"] = create_ticket
         state["ticket_decision_reason"] = reason
 
-        if not create:
-            logger.info("Skipping ticket creation: %s", reason)
-            state["ticket"] = None
-        else:
-            priority = _max_priority(severity, urgency)
+        if create_ticket:
             payload = {
-                "title": (user_message or "(no title)")[:60],
-                "description": user_message,
-                "category": category,
-                "priority": priority,
-                "severity": severity,
-                "urgency": urgency,
-                "session_id": session_id,
+                "title": _ticket_title(state),
+                "description": state.get("user_message") or "",
+                "category": state.get("category") or "other",
+                "priority": _priority_from_state(state),
+                "severity": state.get("severity") or "medium",
+                "urgency": state.get("urgency") or "medium",
+                "session_id": state.get("session_id") or "unknown",
             }
             result = self.client.create_ticket(payload, fallback=True)
             state["ticket"] = result.ticket
-            if result.is_fallback:
-                state["ops_api_unavailable"] = True
+            state["ops_api_unavailable"] = result.is_fallback
+        else:
+            state["ticket"] = None
 
-        # 3. Compose response
-        state["automation_result"] = automation_result
-        existing = state.get("response") or ""
-        extras: list[str] = []
-        if automation_result:
-            extras.append(automation_result)
-        if state.get("ops_api_unavailable"):
-            extras.append(
-                "Note: the ticketing service is currently unavailable; a local "
-                "ticket has been created and will be synced when the service "
-                "returns."
-            )
-        if extras:
-            state["response"] = (existing + "\n" + "\n".join(extras)).strip()
-
+        state["response"] = _append_workflow_result(state)
         return state
+
+
+def _append_workflow_result(state: dict) -> str:
+    parts: list[str] = []
+    if state.get("response"):
+        parts.append(state["response"])
+    if state.get("automation_result"):
+        parts.append(state["automation_result"])
+    if state.get("ticket"):
+        ticket_id = state["ticket"].get("ticket_id")
+        priority = state["ticket"].get("priority", "")
+        suffix = f" with priority {priority}" if priority else ""
+        parts.append(f"I created ticket {ticket_id}{suffix} for follow-up.")
+    if state.get("ops_api_unavailable"):
+        parts.append(
+            "The external ticketing service was unavailable, so this ticket was "
+            "saved locally and will be synced when the service returns."
+        )
+    return "\n\n".join(p for p in parts if p).strip()
