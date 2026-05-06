@@ -1,0 +1,30 @@
+# Environment
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+
+# Vector store
+chroma_db/
+
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Logs and test artifacts
+*.log
+tests/results/*.json
+!tests/results/.gitkeep
