@@ -12,70 +12,70 @@ function uuid() {
 }
 
 /**
- * useChat — manages a conversational message list backed by POST /api/chat.
- *
  * Each message has the shape:
- *   { id, role, content, agentName, ticketId, escalated, timestamp }
+ *   { id, role, content, agentName, ticketId, escalated, sources, timestamp }
  */
 export default function useChat(sessionId) {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorBanner, setErrorBanner] = useState(null);
 
   const sendMessage = useCallback(
     async (text) => {
       const trimmed = (text ?? "").trim();
       if (!trimmed) return;
 
-      const userMessage = {
-        id: uuid(),
-        role: "user",
-        content: trimmed,
-        agentName: null,
-        ticketId: null,
-        escalated: false,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
+      setErrorBanner(null);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: uuid(),
+          role: "user",
+          content: trimmed,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
       setIsLoading(true);
 
       try {
         const resp = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: trimmed,
-            session_id: sessionId,
-          }),
+          body: JSON.stringify({ message: trimmed, session_id: sessionId }),
         });
-
         if (!resp.ok) {
           const errText = await resp.text().catch(() => "");
           throw new Error(`Backend error ${resp.status}: ${errText}`);
         }
-
         const data = await resp.json();
-        const assistantMessage = {
-          id: uuid(),
-          role: "assistant",
-          content: data.content ?? "(empty response)",
-          agentName: data.agent_name ?? "agent",
-          ticketId: data.ticket_id ?? null,
-          escalated: Boolean(data.escalated),
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: uuid(),
+            role: "assistant",
+            content: data.content ?? "(empty response)",
+            agentName: data.agent_name ?? "agent",
+            ticketId: data.ticket_id ?? null,
+            escalated: Boolean(data.escalated),
+            matchStrength: data.match_strength ?? null,
+            sources: Array.isArray(data.sources) ? data.sources : [],
+            severity: data.severity ?? null,
+            urgency: data.urgency ?? null,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
       } catch (err) {
+        const msg = err && err.message ? err.message : String(err);
+        setErrorBanner(msg);
         setMessages((prev) => [
           ...prev,
           {
             id: uuid(),
             role: "assistant",
             content:
-              "Sorry — something went wrong contacting the backend. " +
-              (err && err.message ? err.message : ""),
+              "Sorry — something went wrong contacting the backend. " + msg,
             agentName: "error",
-            ticketId: null,
-            escalated: false,
+            sources: [],
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -86,5 +86,5 @@ export default function useChat(sessionId) {
     [sessionId]
   );
 
-  return { sessionId, messages, isLoading, sendMessage };
+  return { sessionId, messages, isLoading, sendMessage, errorBanner };
 }

@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "doc_id": "kb-001",
+      "title": "Password reset procedure",
+      "category": "password",
+      "source": "internal-kb",
+      "version": "2024-09-01",
+      "body": "Password reset procedure: Go to https://portal.company.com/reset, enter your corporate email, and follow the link sent to your registered email. Reset links expire after 30 minutes. If the link expired, request a new one. Passwords must be at least 12 characters with one uppercase letter, one number, and one symbol."
+    },
+    {
+      "doc_id": "kb-002",
+      "title": "VPN setup with Cisco AnyConnect",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2024-08-15",
+      "body": "VPN setup steps: 1) Install Cisco AnyConnect from the company app catalog. 2) Connect to vpn.company.com. 3) Enter your corporate username and password. 4) Approve the MFA push on your phone. If the push never arrives, check that you are connected to the internet and that the Duo Mobile app is signed in."
+    },
+    {
+      "doc_id": "kb-003",
+      "title": "Software installation error 1603",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2024-07-10",
+      "body": "Software installation error 1603: This indicates a fatal error during MSI install, usually caused by a previous failed install. Resolution: open Add/Remove Programs, remove any partial install, reboot, and re-run the installer as Administrator. Check %TEMP%\\MSI*.log for the exact failing component."
+    },
+    {
+      "doc_id": "kb-004",
+      "title": "Printer troubleshooting",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2024-06-22",
+      "body": "Printer troubleshooting: 1) Confirm the printer has paper and no jam. 2) Restart the print spooler service (services.msc -> Print Spooler -> Restart). 3) Remove and re-add the printer from Settings -> Printers & scanners. 4) For network printers, ping the printer IP to confirm reachability."
+    },
+    {
+      "doc_id": "kb-005",
+      "title": "Account lockout resolution",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2024-09-15",
+      "body": "Account lockout resolution: Accounts lock after 5 failed login attempts and automatically unlock after 15 minutes. To unlock immediately, request unlock from the IT self-service portal or call the helpdesk. After unlock, change your password if you suspect any unauthorized attempts."
+    },
+    {
+      "doc_id": "kb-006",
+      "title": "Windows error 0x80070005 (Access Denied)",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2024-05-30",
+      "body": "Windows error 0x80070005 means 'Access Denied'. It typically appears during Windows Update or file operations and is caused by missing permissions or a corrupted user profile. Fix: run the troubleshooter (Settings -> Update & Security -> Troubleshoot), reset Windows Update components, or run sfc /scannow."
+    },
+    {
+      "doc_id": "kb-007",
+      "title": "Network connectivity troubleshooting",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2024-08-01",
+      "body": "Network connectivity troubleshooting: 1) Check the wifi/ethernet icon. 2) Run `ipconfig /all` and confirm a valid IP and gateway. 3) Try `ping 8.8.8.8` to test external connectivity. 4) Try `nslookup company.com` to test DNS. 5) If DNS fails, run `ipconfig /flushdns` and retry."
+    },
+    {
+      "doc_id": "kb-008",
+      "title": "Disk space warnings and cleanup",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2024-04-20",
+      "body": "Disk space warnings: Windows shows a warning when the system drive falls below 10% free. Clear space by emptying the Recycle Bin, running Disk Cleanup, removing old Windows update files, and uninstalling unused applications. For laptops with small SSDs, move the OneDrive cache and Downloads folder to an external drive."
+    },
+    {
+      "doc_id": "kb-009",
+      "title": "Multi-factor authentication (MFA) setup",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2024-10-01",
+      "body": "Multi-factor authentication (MFA) setup: 1) Install Microsoft Authenticator on your phone. 2) Visit https://aka.ms/mfasetup and sign in. 3) Add an account -> Work or school -> Scan QR code. 4) Approve the test push. Use the recovery codes you are shown to store somewhere safe in case you lose your phone."
+    },
+    {
+      "doc_id": "kb-010",
+      "title": "Common Outlook issues",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2024-09-12",
+      "body": "Common Outlook issues: If Outlook will not open, start it in safe mode (`outlook.exe /safe`) to rule out add-ins. For 'Cannot connect to Exchange', delete the Outlook profile in Control Panel -> Mail and recreate it. For missing emails, check the Junk folder and the Search filters."
+    },
+    {
+      "doc_id": "kb-011",
+      "title": "Remote desktop connection",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2024-07-25",
+      "body": "Remote desktop connection steps: 1) Confirm the target machine has Remote Desktop enabled (System -> Remote settings). 2) Connect to VPN. 3) Open mstsc.exe. 4) Enter the machine name (e.g. PC-12345.corp.local). 5) Authenticate with your domain credentials. If the host is unreachable, ping it first."
+    },
+    {
+      "doc_id": "kb-012",
+      "title": "Browser cache clearing",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2024-06-05",
+      "body": "Browser cache clearing: In Chrome/Edge press Ctrl+Shift+Delete, choose 'All time', tick Cached images and files and Cookies, and click Clear data. This resolves many login loops, broken layouts, and stale single-sign-on issues."
+    },
+    {
+      "doc_id": "kb-013",
+      "title": "Microsoft Teams audio issues",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2024-09-20",
+      "body": "Microsoft Teams audio issues: 1) Open Teams -> Settings -> Devices and confirm the right microphone and speaker are selected. 2) Run a Test call. 3) If you cannot be heard, check Windows Privacy -> Microphone and ensure Teams is allowed. 4) Reinstall Teams if device list is empty."
+    },
+    {
+      "doc_id": "kb-014",
+      "title": "OneDrive sync problems",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2024-08-30",
+      "body": "OneDrive sync problems: A red X on a OneDrive file means sync failed. Right-click the OneDrive icon in the system tray -> Settings -> Account -> Unlink this PC, then sign back in to repair the sync state. Files larger than 250 GB or with reserved characters in the name will not sync."
+    },
+    {
+      "doc_id": "kb-015",
+      "title": "Blue Screen of Death (BSOD) guidance",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2024-05-15",
+      "body": "Blue Screen of Death (BSOD) guidance: Note the stop code shown on the blue screen (for example PAGE_FAULT_IN_NONPAGED_AREA). Common fixes: update or roll back device drivers, run `chkdsk /f`, and run `sfc /scannow`. If BSODs are repeated, collect the minidump from C:\\Windows\\Minidump and contact IT for analysis."
+    },
+    {
+      "doc_id": "kb-016",
+      "title": "DNS troubleshooting",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2024-07-08",
+      "body": "DNS troubleshooting: If you can ping IPs but not hostnames, DNS is broken. Run `ipconfig /flushdns`, then `ipconfig /registerdns`. If still broken, set DNS to the corporate resolver (10.0.0.53) or a public one (1.1.1.1, 8.8.8.8) under adapter properties -> IPv4 -> Use the following DNS server addresses."
+    }
+  ]
+}

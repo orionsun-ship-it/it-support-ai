@@ -3,14 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IT Support AI</title>
+    <title>IT Support · AI Assistant</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <style>
+      :root {
+        --bg: #f7f8fa;
+        --surface: #ffffff;
+        --surface-soft: #fafbfc;
+        --sidebar-bg: #0b1220;
+        --sidebar-bg-2: #111a2e;
+        --sidebar-text: #cbd5e1;
+        --sidebar-text-muted: #64748b;
+        --sidebar-text-strong: #f1f5f9;
+        --sidebar-active: rgba(59, 130, 246, 0.16);
+        --sidebar-active-border: rgba(96, 165, 250, 0.4);
+        --border: #e5e7eb;
+        --border-strong: #d1d5db;
+        --text: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #6b7280;
+        --text-faint: #94a3b8;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-soft: #eff6ff;
+        --brand-ring: rgba(37, 99, 235, 0.18);
+        --teal: #0d9488;
+        --teal-soft: #ccfbf1;
+        --amber: #d97706;
+        --amber-soft: #fef3c7;
+        --red: #dc2626;
+        --red-soft: #fee2e2;
+        --green: #059669;
+        --green-soft: #d1fae5;
+        --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+        --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+        --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+        --shadow-focus: 0 0 0 4px var(--brand-ring);
+        --radius-sm: 6px;
+        --radius: 8px;
+        --radius-md: 10px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+      }
+
       * {
         box-sizing: border-box;
       }
@@ -21,13 +61,54 @@
         margin: 0;
       }
       body {
-        font-family: "IBM Plex Sans", system-ui, sans-serif;
-        background: #f8fafc;
-        color: #0f172a;
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
         font-size: 14px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
       }
       .mono {
-        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+        font-feature-settings: "ss01", "cv02", "cv11";
+      }
+
+      /* Pretty scrollbars (WebKit) */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+        background-clip: padding-box;
+        border: 2px solid transparent;
+      }
+
+      button,
+      input,
+      textarea {
+        font-family: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: not-allowed;
+      }
+      input:focus-visible,
+      button:focus-visible {
+        outline: none;
+        box-shadow: var(--shadow-focus);
       }
     </style>
   </head>

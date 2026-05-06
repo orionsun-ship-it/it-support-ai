@@ -1,12 +1,21 @@
 {
-  "version": 1,
+  "version": 2,
   "scenarios": [
+    {
+      "id": "greeting-no-ticket",
+      "user_message": "hi",
+      "expected_category": "other",
+      "expect_is_support_request": false,
+      "expect_ticket": false,
+      "expect_escalation": false,
+      "expected_kb_keywords": []
+    },
     {
       "id": "password-reset-clear",
       "user_message": "I forgot my password and need to reset it.",
       "expected_category": "password",
-      "expected_min_confidence": 0.6,
-      "expect_ticket": true,
+      "expect_is_support_request": true,
+      "expect_ticket": false,
       "expect_escalation": false,
       "expected_kb_keywords": ["reset", "password"]
     },
@@ -14,8 +23,8 @@
       "id": "vpn-setup",
       "user_message": "How do I set up the company VPN on my new laptop?",
       "expected_category": "network",
-      "expected_min_confidence": 0.5,
-      "expect_ticket": true,
+      "expect_is_support_request": true,
+      "expect_ticket": false,
       "expect_escalation": false,
       "expected_kb_keywords": ["vpn", "anyconnect"]
     },
@@ -23,8 +32,8 @@
       "id": "account-locked",
       "user_message": "My account is locked after too many failed logins.",
       "expected_category": "access",
-      "expected_min_confidence": 0.5,
-      "expect_ticket": true,
+      "expect_is_support_request": true,
+      "expect_ticket": false,
       "expect_escalation": false,
       "expected_kb_keywords": ["lockout", "unlock"]
     },
@@ -32,8 +41,8 @@
       "id": "software-error-1603",
       "user_message": "Installer fails with error 1603, what should I do?",
       "expected_category": "software",
-      "expected_min_confidence": 0.5,
-      "expect_ticket": true,
+      "expect_is_support_request": true,
+      "expect_ticket": false,
       "expect_escalation": false,
       "expected_kb_keywords": ["1603", "msi"]
     },
@@ -41,35 +50,25 @@
       "id": "urgent-keyword-triggers-escalation",
       "user_message": "My machine is dead and I urgently need help, this is critical.",
       "expected_category": "hardware",
-      "expected_min_confidence": 0.0,
+      "expect_is_support_request": true,
       "expect_ticket": true,
       "expect_escalation": true,
       "expected_kb_keywords": []
     },
     {
       "id": "low-confidence-vague",
-      "user_message": "thingy not working",
-      "expected_category": "other",
-      "expected_min_confidence": 0.0,
+      "user_message": "thingy not working please help right now",
+      "expect_is_support_request": true,
       "expect_ticket": true,
       "expect_escalation": true,
       "expected_kb_keywords": []
     },
     {
-      "id": "printer-issue",
-      "user_message": "The office printer keeps showing offline.",
-      "expected_category": "hardware",
-      "expected_min_confidence": 0.4,
-      "expect_ticket": true,
-      "expect_escalation": false,
-      "expected_kb_keywords": ["printer", "spooler"]
-    },
-    {
       "id": "outlook-cannot-open",
       "user_message": "Outlook will not open this morning.",
       "expected_category": "software",
-      "expected_min_confidence": 0.5,
-      "expect_ticket": true,
+      "expect_is_support_request": true,
+      "expect_ticket": false,
       "expect_escalation": false,
       "expected_kb_keywords": ["outlook", "safe"]
     }

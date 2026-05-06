@@ -1,42 +1,80 @@
-"""Workflow agent — runs deterministic automations and creates a ticket via the MCP server."""
+"""Workflow agent.
+
+Two responsibilities:
+1. Run scripted automations (password reset, account unlock, license check).
+2. Decide whether to open a ticket — and only open one when needed.
+
+Ticket creation rules (in priority order):
+  - intake says is_support_request == False  -> NO ticket
+  - explicit escalation keywords            -> ticket (priority from severity/urgency)
+  - retrieval is "weak" or "none"           -> ticket (KB didn't cover it)
+  - urgency == high                         -> ticket
+  - otherwise                               -> NO ticket (KB answered the user)
+"""
 
 from __future__ import annotations
 
-import os
-import uuid
-from datetime import datetime
+import re
 
-import httpx
-from dotenv import load_dotenv
-
+from backend.services.it_ops_client import ItOpsClient
 from backend.utils.logger import get_logger
 
-load_dotenv()
 logger = get_logger(__name__)
 
-MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8001")
+ESCALATION_KEYWORDS = re.compile(
+    r"\b(urgent|critical|emergency|asap|immediately|cannot work|can't work|outage|"
+    r"data loss|production down)\b",
+    re.IGNORECASE,
+)
+
+# Priority is computed from severity + urgency, NOT classifier confidence.
+_PRIORITY_LADDER = ["low", "medium", "high", "critical"]
+
+
+def _max_priority(severity: str, urgency: str) -> str:
+    sev_idx = _PRIORITY_LADDER.index(severity) if severity in _PRIORITY_LADDER else 1
+    urg_map = {"low": 0, "medium": 1, "high": 2}
+    urg_idx = urg_map.get(urgency, 1)
+    return _PRIORITY_LADDER[max(sev_idx, urg_idx)]
+
+
+def _should_create_ticket(state: dict) -> tuple[bool, str]:
+    if not state.get("is_support_request", True):
+        return False, "not a support request"
+    user_message = state.get("user_message") or ""
+    if ESCALATION_KEYWORDS.search(user_message):
+        return True, "escalation keyword"
+    if state.get("match_strength") in {"weak", "none"}:
+        return True, "no strong KB match"
+    if state.get("urgency") == "high":
+        return True, "high urgency"
+    return False, "KB likely covered the question"
 
 
 class WorkflowAgent:
-    """Performs scripted workflow automations and creates a ticket through the MCP server."""
+    """Runs automations and conditionally opens a ticket."""
+
+    def __init__(self, client: ItOpsClient | None = None) -> None:
+        self.client = client or ItOpsClient()
 
     def run(self, state: dict) -> dict:
         category = state.get("category") or "other"
-        confidence = float(state.get("confidence") or 0.0)
+        severity = state.get("severity") or "medium"
+        urgency = state.get("urgency") or "medium"
         user_message = state.get("user_message") or ""
         session_id = state.get("session_id") or "unknown"
 
-        # 1. Automation result by category
+        # 1. Scripted automation by category
         automation_result: str | None
         if category == "password":
             automation_result = (
-                "Password reset initiated. A reset link will be sent to your registered "
-                "email within 5 minutes."
+                "Password reset initiated. A reset link will be sent to your "
+                "registered email within 5 minutes."
             )
         elif category == "access":
             automation_result = (
-                "Account unlock request submitted. Your account will be unlocked within "
-                "2 minutes."
+                "Account unlock request submitted. Your account will be unlocked "
+                "within 2 minutes."
             )
         elif category == "software":
             automation_result = (
@@ -45,75 +83,43 @@ class WorkflowAgent:
         else:
             automation_result = None
 
-        # 2. Priority from confidence
-        if confidence > 0.8:
-            priority = "low"
-        elif confidence >= 0.5:
-            priority = "medium"
+        # 2. Decide whether to create a ticket
+        create, reason = _should_create_ticket(state)
+        state["should_create_ticket"] = create
+        state["ticket_decision_reason"] = reason
+
+        if not create:
+            logger.info("Skipping ticket creation: %s", reason)
+            state["ticket"] = None
         else:
-            priority = "high"
-        # The escalation agent may upgrade this to "critical" downstream.
-
-        # 3. Create ticket via MCP, with a local fallback
-        title = (user_message or "(no title)")[:60]
-        payload = {
-            "title": title,
-            "description": user_message,
-            "category": category,
-            "priority": priority,
-            "session_id": session_id,
-        }
-
-        ticket: dict | None = None
-        unavailable_note = False
-        try:
-            with httpx.Client(timeout=5.0) as client:
-                resp = client.post(f"{MCP_SERVER_URL}/tools/create_ticket", json=payload)
-                resp.raise_for_status()
-                ticket = resp.json()
-        except httpx.RequestError as exc:
-            logger.warning(
-                "MCP unreachable, creating local ticket. Underlying error: %s", exc
-            )
-            ticket = {
-                "ticket_id": "LOCAL-" + uuid.uuid4().hex[:8].upper(),
-                "title": title,
+            priority = _max_priority(severity, urgency)
+            payload = {
+                "title": (user_message or "(no title)")[:60],
                 "description": user_message,
                 "category": category,
                 "priority": priority,
+                "severity": severity,
+                "urgency": urgency,
                 "session_id": session_id,
-                "status": "open",
-                "created_at": datetime.now().isoformat(),
             }
-            unavailable_note = True
-        except httpx.HTTPStatusError as exc:
-            logger.warning("MCP returned an HTTP error: %s", exc)
-            ticket = {
-                "ticket_id": "LOCAL-" + uuid.uuid4().hex[:8].upper(),
-                "title": title,
-                "description": user_message,
-                "category": category,
-                "priority": priority,
-                "session_id": session_id,
-                "status": "open",
-                "created_at": datetime.now().isoformat(),
-            }
-            unavailable_note = True
+            result = self.client.create_ticket(payload, fallback=True)
+            state["ticket"] = result.ticket
+            if result.is_fallback:
+                state["ops_api_unavailable"] = True
 
-        state["ticket"] = ticket
+        # 3. Compose response
         state["automation_result"] = automation_result
-
-        # 4. Append automation_result + any unavailability note to the response.
-        existing_response = state.get("response") or ""
-        extra_lines: list[str] = []
+        existing = state.get("response") or ""
+        extras: list[str] = []
         if automation_result:
-            extra_lines.append(automation_result)
-        if unavailable_note:
-            extra_lines.append(
-                "Note: the ticketing service is currently unavailable; a local ticket has "
-                "been created and will be synced when the service returns."
+            extras.append(automation_result)
+        if state.get("ops_api_unavailable"):
+            extras.append(
+                "Note: the ticketing service is currently unavailable; a local "
+                "ticket has been created and will be synced when the service "
+                "returns."
             )
-        if extra_lines:
-            state["response"] = (existing_response + "\n" + "\n".join(extra_lines)).strip()
+        if extras:
+            state["response"] = (existing + "\n" + "\n".join(extras)).strip()
 
         return state

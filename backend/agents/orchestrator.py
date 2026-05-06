@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TypedDict
+from typing import Any, List, Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
@@ -23,23 +23,31 @@ class AgentState(TypedDict, total=False):
     category: str | None
     intent: str | None
     confidence: float
+    severity: str | None
+    urgency: str | None
+    is_support_request: bool
     context: str | None
     context_scores: list | None
+    match_strength: Literal["strong", "weak", "none"] | None
+    sources: List[dict]
     response: str | None
     ticket: dict | None
+    should_create_ticket: bool
+    ticket_decision_reason: str | None
+    ops_api_unavailable: bool
     escalated: bool
     automation_result: str | None
     response_time_ms: float
 
 
-# Instantiate agents once at module load — they hold lazy LLM clients and KB handles.
+# Module-level singletons — heavy LLM/RAG handles, instantiated once.
 _intake = IntakeAgent()
 _knowledge = KnowledgeAgent()
 _workflow = WorkflowAgent()
 _escalation = EscalationAgent()
 
 
-def _build_graph():
+def _build_graph() -> Any:
     builder = StateGraph(AgentState)
     builder.add_node("intake", _intake.run)
     builder.add_node("knowledge", _knowledge.run)
@@ -63,13 +71,8 @@ def process_message(
     session_id: str,
     history: list,
 ) -> dict:
-    """Run a single user turn through the full agent graph.
-
-    Returns the final AgentState dict including response, ticket, escalated, and
-    response_time_ms.
-    """
+    """Run a single user turn through the full agent graph."""
     start = time.perf_counter()
-
     initial_state: dict = {
         "user_message": user_message,
         "session_id": session_id,
@@ -77,10 +80,18 @@ def process_message(
         "category": None,
         "intent": None,
         "confidence": 0.0,
+        "severity": None,
+        "urgency": None,
+        "is_support_request": True,
         "context": None,
         "context_scores": None,
+        "match_strength": None,
+        "sources": [],
         "response": None,
         "ticket": None,
+        "should_create_ticket": False,
+        "ticket_decision_reason": None,
+        "ops_api_unavailable": False,
         "escalated": False,
         "automation_result": None,
         "response_time_ms": 0.0,
@@ -91,15 +102,18 @@ def process_message(
     final_state["response_time_ms"] = elapsed_ms
 
     logger.info(
-        "process_message session=%s category=%s confidence=%.2f escalated=%s "
-        "elapsed_ms=%.1f",
+        "process_message session=%s category=%s confidence=%.2f severity=%s "
+        "urgency=%s match=%s ticket=%s escalated=%s elapsed_ms=%.1f",
         session_id,
         final_state.get("category"),
         float(final_state.get("confidence") or 0.0),
+        final_state.get("severity"),
+        final_state.get("urgency"),
+        final_state.get("match_strength"),
+        (final_state.get("ticket") or {}).get("ticket_id"),
         final_state.get("escalated"),
         elapsed_ms,
     )
-
     return final_state
 
 

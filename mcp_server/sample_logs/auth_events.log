@@ -1,0 +1,10 @@
+2026-05-04 07:55:11 INFO  auth.login Successful login for user mchen@corp.local from 10.20.4.18
+2026-05-04 08:01:02 INFO  auth.login Successful login for user akumar@corp.local from 10.20.7.92
+2026-05-04 08:14:48 WARNING auth.login Failed login for user jdoe@corp.local from 10.20.4.21 — bad password
+2026-05-04 08:16:33 WARNING auth.login Failed login for user jdoe@corp.local from 10.20.4.21 — bad password
+2026-05-04 08:18:07 ERROR auth.lockout Account jdoe@corp.local locked after 5 failed attempts
+2026-05-04 09:02:45 INFO  auth.reset Password reset link issued for user jdoe@corp.local (expires in 30m)
+2026-05-04 09:31:12 INFO  auth.reset Password reset completed for user jdoe@corp.local from 10.20.4.21
+2026-05-04 09:32:01 INFO  auth.login Successful login for user jdoe@corp.local from 10.20.4.21
+2026-05-04 10:48:55 WARNING auth.mfa MFA push timeout for user blee@corp.local — challenge not approved
+2026-05-04 11:14:22 ERROR auth.lockout Account contractor-vsmith@corp.local locked after 5 failed attempts

@@ -2,66 +2,79 @@
 
 from __future__ import annotations
 
-import os
+import re
 
-import httpx
-from dotenv import load_dotenv
-
+from backend.services.it_ops_client import ItOpsClient
 from backend.utils.logger import get_logger
 
-load_dotenv()
 logger = get_logger(__name__)
 
-MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8001")
+ESCALATION_KEYWORDS = re.compile(
+    r"\b(urgent|critical|emergency|asap|immediately|cannot work|can't work|outage|"
+    r"data loss|production down)\b",
+    re.IGNORECASE,
+)
 
-ESCALATION_KEYWORDS = ("urgent", "critical", "emergency", "asap", "immediately")
+
+def _should_escalate(state: dict) -> bool:
+    confidence = float(state.get("confidence") or 0.0)
+    user_message = state.get("user_message") or ""
+    category = state.get("category") or "other"
+    severity = state.get("severity") or "medium"
+    urgency = state.get("urgency") or "medium"
+
+    if ESCALATION_KEYWORDS.search(user_message):
+        return True
+    if severity == "critical" or urgency == "high":
+        return True
+    if confidence < 0.4:
+        return True
+    if category == "hardware" and confidence < 0.6:
+        return True
+    if state.get("match_strength") == "none" and state.get("is_support_request", True):
+        return True
+    return False
 
 
 class EscalationAgent:
     """Decides whether a turn should be escalated to a human IT technician."""
 
+    def __init__(self, client: ItOpsClient | None = None) -> None:
+        self.client = client or ItOpsClient()
+
     def run(self, state: dict) -> dict:
-        confidence = float(state.get("confidence") or 0.0)
-        user_message = (state.get("user_message") or "").lower()
-        category = state.get("category") or "other"
-
-        rule_low_confidence = confidence < 0.4
-        rule_keyword = any(kw in user_message for kw in ESCALATION_KEYWORDS)
-        rule_hardware = category == "hardware" and confidence < 0.6
-
-        escalated = rule_low_confidence or rule_keyword or rule_hardware
+        escalated = _should_escalate(state)
         state["escalated"] = bool(escalated)
 
         if not escalated:
             return state
 
         ticket = state.get("ticket") or {}
-        ticket_id = ticket.get("ticket_id", "(no ticket)")
+        ticket_id = ticket.get("ticket_id")
+        new_priority = "critical"
 
-        if ticket and ticket.get("ticket_id"):
-            try:
-                with httpx.Client(timeout=5.0) as client:
-                    resp = client.patch(
-                        f"{MCP_SERVER_URL}/tools/tickets/{ticket['ticket_id']}/status",
-                        json={"new_status": "escalated"},
-                    )
-                    if resp.status_code == 200:
-                        ticket = resp.json()
-                        state["ticket"] = ticket
-            except httpx.RequestError as exc:
-                logger.warning(
-                    "Could not mark ticket %s as escalated via MCP: %s",
-                    ticket_id,
-                    exc,
-                )
-                # Best-effort: also update the in-memory copy
-                ticket["status"] = "escalated"
-                state["ticket"] = ticket
+        if ticket_id and not str(ticket_id).startswith("LOCAL-"):
+            updated = self.client.update_status(ticket_id, "escalated")
+            if updated:
+                state["ticket"] = updated
+            bumped = self.client.update_priority(ticket_id, new_priority)
+            if bumped:
+                state["ticket"] = bumped
+        elif ticket:
+            # Local fallback — update in place.
+            ticket["status"] = "escalated"
+            ticket["priority"] = new_priority
+            state["ticket"] = ticket
 
         existing = state.get("response") or ""
+        ticket_phrase = (
+            f"Ticket {ticket_id} is now {new_priority} priority."
+            if ticket_id
+            else "A new ticket will be opened at critical priority."
+        )
         banner = (
             f"\n\n⚠️ This issue has been escalated to a human IT technician. "
-            f"Ticket {ticket_id} is now priority. Expected response time: 2-4 hours."
+            f"{ticket_phrase} Expected response time: 2-4 hours."
         )
         state["response"] = existing + banner
 

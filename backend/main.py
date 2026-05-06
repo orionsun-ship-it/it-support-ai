@@ -2,19 +2,21 @@
 
 from __future__ import annotations
 
-import os
+import json
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List
 
-import httpx
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.agents.orchestrator import process_message
+from backend.config import get_settings
 from backend.models.schemas import (
     AgentResponse,
     ConversationTurn,
+    KBSource,
     SessionState,
     SystemMetrics,
     TicketCreate,
@@ -22,43 +24,90 @@ from backend.models.schemas import (
     UserMessage,
 )
 from backend.rag.retriever import KnowledgeRetriever, seed_knowledge_base
+from backend.services.it_ops_client import ItOpsClient
 from backend.utils.logger import get_logger
 
-load_dotenv()
 logger = get_logger(__name__)
+settings = get_settings()
 
-MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8001")
-
-app = FastAPI(title="IT Support AI Backend", version="0.1.0")
+app = FastAPI(title="IT Support AI Backend", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.allowed_origins_list,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PATCH"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 
-# In-memory state ----------------------------------------------------------
+# ---------------------------------------------------------------------------
+# In-memory state — fine for local dev. Phase-4 follow-up: move to Redis/DB.
+# ---------------------------------------------------------------------------
 
 sessions: Dict[str, SessionState] = {}
 request_log: List[Dict[str, Any]] = []
 app_start_time: datetime = datetime.now()
+ops_client = ItOpsClient()
 
 
-# Startup ------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Startup
+# ---------------------------------------------------------------------------
 
 
 @app.on_event("startup")
 def _startup() -> None:
+    # ---- Anthropic API key visibility ----
+    import os
+
+    settings_key = (settings.anthropic_api_key or "").strip()
+    env_key = (os.environ.get("ANTHROPIC_API_KEY") or "").strip()
+    if not settings_key and not env_key:
+        logger.error(
+            "ANTHROPIC_API_KEY is NOT loaded. Edit .env (no quotes, no spaces) "
+            "and restart. Looked for it in %s and in the shell env.",
+            settings.model_config.get("env_file"),
+        )
+    else:
+        chosen = settings_key or env_key
+        source = "settings/.env" if settings_key else "shell env"
+        if chosen.startswith("sk-ant-"):
+            logger.info(
+                "ANTHROPIC_API_KEY loaded from %s (prefix=%s..., length=%d)",
+                source,
+                chosen[:10],
+                len(chosen),
+            )
+        else:
+            logger.warning(
+                "ANTHROPIC_API_KEY found in %s but does NOT start with 'sk-ant-' "
+                "(got prefix=%r, length=%d). Did you paste the wrong value?",
+                source,
+                chosen[:10],
+                len(chosen),
+            )
+        # Make sure langchain-anthropic, which reads os.environ directly, can see it.
+        if settings_key and not env_key:
+            os.environ["ANTHROPIC_API_KEY"] = settings_key
+
+    problems = settings.validate_runtime(require_llm=True)
+    if problems:
+        for p in problems:
+            logger.error("config: %s", p)
+        if settings.is_prod:
+            sys.exit("Refusing to start in prod with invalid config")
+
     try:
-        seed_knowledge_base()
+        summary = seed_knowledge_base()
+        logger.info("KB ingestion summary: %s", summary)
     except Exception as exc:  # noqa: BLE001
-        logger.error("Failed to seed knowledge base on startup: %s", exc)
+        logger.error("Failed to seed knowledge base: %s", exc)
 
 
-# Helpers ------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 
 def _get_or_create_session(session_id: str) -> SessionState:
@@ -69,24 +118,24 @@ def _get_or_create_session(session_id: str) -> SessionState:
     return session
 
 
-def _check_mcp_available(timeout: float = 2.0) -> bool:
-    try:
-        with httpx.Client(timeout=timeout) as client:
-            resp = client.get(f"{MCP_SERVER_URL}/health")
-            return resp.status_code == 200
-    except httpx.RequestError:
-        return False
+def _kb_sources_from_state(state: dict) -> list[KBSource]:
+    out: list[KBSource] = []
+    for s in state.get("sources") or []:
+        try:
+            out.append(KBSource(**s))
+        except Exception:  # noqa: BLE001
+            continue
+    return out
 
 
-# Endpoints ----------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 
 
 @app.post("/chat", response_model=AgentResponse)
 def chat(payload: UserMessage) -> AgentResponse:
-    """Main chat endpoint — runs the user's message through the agent graph."""
     session = _get_or_create_session(payload.session_id)
-
-    # Last 10 turns to keep prompt size manageable.
     history_models = session.history[-10:]
     history = [{"role": t.role, "content": t.content} for t in history_models]
 
@@ -109,11 +158,9 @@ def chat(payload: UserMessage) -> AgentResponse:
     ticket_id = ticket.get("ticket_id")
     escalated = bool(state.get("escalated"))
     response_time_ms = float(state.get("response_time_ms") or 0.0)
+    sources = _kb_sources_from_state(state)
 
-    # Update session
-    session.history.append(
-        ConversationTurn(role="user", content=payload.message)
-    )
+    session.history.append(ConversationTurn(role="user", content=payload.message))
     session.history.append(
         ConversationTurn(
             role="assistant",
@@ -121,24 +168,14 @@ def chat(payload: UserMessage) -> AgentResponse:
             agent_name="it-support-ai",
             ticket_id=ticket_id,
             escalated=escalated,
+            sources=sources,
         )
     )
     if escalated:
         session.escalated = True
     if ticket and ticket.get("ticket_id"):
         try:
-            session.current_ticket = TicketResponse(
-                ticket_id=ticket["ticket_id"],
-                title=ticket.get("title", ""),
-                description=ticket.get("description", ""),
-                priority=ticket.get("priority", "medium"),
-                category=ticket.get("category", "other"),
-                session_id=ticket.get("session_id", payload.session_id),
-                status=ticket.get("status", "open"),
-                created_at=datetime.fromisoformat(ticket["created_at"])
-                if isinstance(ticket.get("created_at"), str)
-                else (ticket.get("created_at") or datetime.now()),
-            )
+            session.current_ticket = TicketResponse(**_normalize_ticket(ticket, payload.session_id))
         except Exception as exc:  # noqa: BLE001
             logger.warning("Could not coerce ticket into TicketResponse: %s", exc)
 
@@ -154,10 +191,30 @@ def chat(payload: UserMessage) -> AgentResponse:
         agent_name="it-support-ai",
         content=response_text,
         confidence=confidence,
+        severity=state.get("severity"),
+        urgency=state.get("urgency"),
         action_taken=automation_result,
         ticket_id=ticket_id,
         escalated=escalated,
+        match_strength=state.get("match_strength"),
+        sources=sources,
     )
+
+
+def _normalize_ticket(ticket: dict, session_id: str) -> dict:
+    return {
+        "ticket_id": ticket["ticket_id"],
+        "title": ticket.get("title", ""),
+        "description": ticket.get("description", ""),
+        "priority": ticket.get("priority", "medium"),
+        "category": ticket.get("category", "other"),
+        "severity": ticket.get("severity", "medium"),
+        "urgency": ticket.get("urgency", "medium"),
+        "session_id": ticket.get("session_id", session_id),
+        "status": ticket.get("status", "open"),
+        "created_at": ticket.get("created_at") or datetime.utcnow().isoformat(),
+        "updated_at": ticket.get("updated_at"),
+    }
 
 
 @app.get("/session/{session_id}", response_model=SessionState)
@@ -170,107 +227,100 @@ def get_session(session_id: str) -> SessionState:
 
 @app.get("/tickets")
 def list_tickets() -> list[dict]:
-    """Proxies the MCP server's list_tickets. Falls back to session state if MCP is down."""
-    try:
-        with httpx.Client(timeout=5.0) as client:
-            resp = client.get(f"{MCP_SERVER_URL}/tools/list_tickets")
-            resp.raise_for_status()
-            return resp.json()
-    except httpx.RequestError as exc:
-        logger.warning("MCP list_tickets unreachable, falling back: %s", exc)
-        fallback: list[dict] = []
-        for sess in sessions.values():
-            if sess.current_ticket is not None:
-                fallback.append(sess.current_ticket.model_dump(mode="json"))
-        return fallback
-    except httpx.HTTPStatusError as exc:
-        logger.warning("MCP list_tickets HTTP error: %s", exc)
-        raise HTTPException(status_code=502, detail="MCP server returned an error") from exc
+    return ops_client.list_tickets()
 
 
 @app.post("/tickets", response_model=TicketResponse)
-def create_ticket(payload: TicketCreate) -> TicketResponse:
-    """Proxy ticket creation through the MCP server."""
-    try:
-        with httpx.Client(timeout=5.0) as client:
-            resp = client.post(
-                f"{MCP_SERVER_URL}/tools/create_ticket",
-                json=payload.model_dump(),
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            return TicketResponse(
-                ticket_id=data["ticket_id"],
-                title=data["title"],
-                description=data["description"],
-                priority=data["priority"],
-                category=data["category"],
-                session_id=data["session_id"],
-                status=data["status"],
-                created_at=datetime.fromisoformat(data["created_at"])
-                if isinstance(data["created_at"], str)
-                else data["created_at"],
-            )
-    except httpx.RequestError as exc:
-        logger.error("MCP create_ticket unreachable: %s", exc)
-        raise HTTPException(
-            status_code=503, detail="MCP server is not reachable"
-        ) from exc
-    except httpx.HTTPStatusError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
+def create_ticket_endpoint(payload: TicketCreate) -> TicketResponse:
+    result = ops_client.create_ticket(payload.model_dump(), fallback=False)
+    data = result.ticket
+    return TicketResponse(**_normalize_ticket(data, payload.session_id))
 
 
 @app.get("/metrics", response_model=SystemMetrics)
 def metrics() -> SystemMetrics:
     total_requests = len(request_log)
-    if total_requests > 0:
-        avg_response_time = sum(r["response_time_ms"] for r in request_log) / total_requests
-    else:
-        avg_response_time = 0.0
-
+    avg_response = (
+        sum(r["response_time_ms"] for r in request_log) / total_requests
+        if total_requests
+        else 0.0
+    )
     total_escalations = sum(1 for r in request_log if r["escalated"])
 
-    # Total tickets from MCP, fallback to session-local counts.
-    total_tickets = 0
-    try:
-        with httpx.Client(timeout=2.0) as client:
-            resp = client.get(f"{MCP_SERVER_URL}/tools/list_tickets")
-            resp.raise_for_status()
-            total_tickets = len(resp.json())
-    except httpx.RequestError:
-        total_tickets = sum(1 for s in sessions.values() if s.current_ticket is not None)
+    ops_available = ops_client.is_available(timeout=2.0)
+    total_tickets = len(ops_client.list_tickets()) if ops_available else 0
 
     try:
         kb_seeded = KnowledgeRetriever().count() > 0
     except Exception as exc:  # noqa: BLE001
-        logger.warning("Could not query KB count: %s", exc)
+        logger.warning("KB count failed: %s", exc)
         kb_seeded = False
-
-    uptime_seconds = (datetime.now() - app_start_time).total_seconds()
 
     return SystemMetrics(
         total_requests=total_requests,
-        avg_response_time_ms=avg_response_time,
+        avg_response_time_ms=avg_response,
         total_tickets=total_tickets,
         total_escalations=total_escalations,
         kb_seeded=kb_seeded,
-        uptime_seconds=uptime_seconds,
+        uptime_seconds=(datetime.now() - app_start_time).total_seconds(),
+        ops_api_available=ops_available,
     )
+
+
+@app.get("/sources")
+def list_sources() -> dict:
+    """List every KB document on disk (the source of truth, not the vector index)."""
+    kb_dir = Path(settings.kb_dir)
+    docs: list[dict] = []
+    files: list[str] = []
+    if kb_dir.exists():
+        for path in sorted(kb_dir.glob("*.json")):
+            files.append(path.name)
+            try:
+                payload = json.loads(path.read_text())
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Could not parse %s: %s", path, exc)
+                continue
+            entries = (
+                payload.get("documents", [])
+                if isinstance(payload, dict) and "documents" in payload
+                else (payload if isinstance(payload, list) else [payload])
+            )
+            for d in entries:
+                if not isinstance(d, dict):
+                    continue
+                docs.append(
+                    {
+                        "doc_id": d.get("doc_id") or d.get("id", ""),
+                        "title": d.get("title", ""),
+                        "category": d.get("category", "other"),
+                        "source": d.get("source", "internal-kb"),
+                        "version": d.get("version", ""),
+                        "updated_at": d.get("updated_at", ""),
+                        "body": d.get("body") or d.get("text", ""),
+                        "source_file": path.name,
+                    }
+                )
+    return {
+        "kb_dir": str(kb_dir),
+        "files": files,
+        "total": len(docs),
+        "documents": docs,
+    }
 
 
 @app.get("/debug/retrieve")
 def debug_retrieve(query: str) -> dict:
-    """Debug endpoint — remove or restrict before production."""
+    """Debug endpoint — disabled when ENABLE_DEBUG_ENDPOINTS=false."""
+    if not settings.enable_debug_endpoints:
+        raise HTTPException(status_code=404, detail="Not found")
     retriever = KnowledgeRetriever()
-    raw = retriever.retrieve_with_scores(query, n_results=3)
-    formatted = retriever.retrieve(query, n_results=3)
+    result = retriever.retrieve(query, n_results=3)
     return {
         "query": query,
-        "results": [
-            {"text": r["text"], "distance": r["distance"], "metadata": r["metadata"]}
-            for r in raw
-        ],
-        "formatted_context": formatted,
+        "match_strength": result.match_strength,
+        "sources": [s.to_dict() for s in result.sources],
+        "formatted_context": KnowledgeRetriever.format_context(result),
     }
 
 
@@ -283,5 +333,5 @@ def health() -> dict:
     return {
         "status": "ok",
         "kb_seeded": kb_seeded,
-        "mcp_available": _check_mcp_available(),
+        "ops_api_available": ops_client.is_available(),
     }

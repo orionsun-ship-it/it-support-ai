@@ -4,9 +4,14 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, Field
+
+Category = Literal["password", "software", "hardware", "network", "access", "other"]
+Priority = Literal["low", "medium", "high", "critical"]
+Severity = Literal["low", "medium", "high", "critical"]
+Urgency = Literal["low", "medium", "high"]
 
 
 class UserMessage(BaseModel):
@@ -17,15 +22,31 @@ class UserMessage(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
+class KBSource(BaseModel):
+    """A retrieved knowledge base chunk surfaced to the frontend."""
+
+    doc_id: str
+    title: str
+    category: str
+    score: float
+    distance: float
+    snippet: str
+    chunk_id: str = ""
+
+
 class AgentResponse(BaseModel):
     """The response returned to the frontend after agents process a turn."""
 
     agent_name: str
     content: str
     confidence: float = Field(ge=0.0, le=1.0)
-    action_taken: str | None = None
-    ticket_id: str | None = None
+    severity: Optional[Severity] = None
+    urgency: Optional[Urgency] = None
+    action_taken: Optional[str] = None
+    ticket_id: Optional[str] = None
     escalated: bool = False
+    match_strength: Optional[Literal["strong", "weak", "none"]] = None
+    sources: List[KBSource] = Field(default_factory=list)
 
 
 class TicketCreate(BaseModel):
@@ -33,17 +54,20 @@ class TicketCreate(BaseModel):
 
     title: str
     description: str
-    priority: Literal["low", "medium", "high", "critical"]
-    category: Literal["password", "software", "hardware", "network", "access", "other"]
+    priority: Priority
+    category: Category
+    severity: Severity = "medium"
+    urgency: Urgency = "medium"
     session_id: str
 
 
 class TicketResponse(TicketCreate):
-    """A ticket as returned by the MCP ticket tool — extends TicketCreate with server-set fields."""
+    """A ticket as returned by the IT Ops API — extends TicketCreate with server fields."""
 
     ticket_id: str
     status: str
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
 
 class ConversationTurn(BaseModel):
@@ -51,9 +75,10 @@ class ConversationTurn(BaseModel):
 
     role: Literal["user", "assistant"]
     content: str
-    agent_name: str | None = None
-    ticket_id: str | None = None
+    agent_name: Optional[str] = None
+    ticket_id: Optional[str] = None
     escalated: bool = False
+    sources: List[KBSource] = Field(default_factory=list)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
@@ -61,8 +86,8 @@ class SessionState(BaseModel):
     """In-memory state for a single user session."""
 
     session_id: str
-    history: list[ConversationTurn] = Field(default_factory=list)
-    current_ticket: TicketResponse | None = None
+    history: List[ConversationTurn] = Field(default_factory=list)
+    current_ticket: Optional[TicketResponse] = None
     escalated: bool = False
 
 
@@ -75,3 +100,4 @@ class SystemMetrics(BaseModel):
     total_escalations: int
     kb_seeded: bool
     uptime_seconds: float
+    ops_api_available: bool = True

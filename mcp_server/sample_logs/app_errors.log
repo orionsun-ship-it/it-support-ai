@@ -1,0 +1,10 @@
+2026-05-04 08:12:03 INFO  app.startup Service api-gateway started successfully on port 8080
+2026-05-04 08:47:21 WARNING app.disk Disk usage on /var has reached 87% — consider rotating logs
+2026-05-04 09:03:55 ERROR app.auth Authentication failed for user jdoe@corp.local — invalid credentials (3rd attempt)
+2026-05-04 09:04:09 ERROR app.auth Authentication failed for user jdoe@corp.local — invalid credentials (4th attempt)
+2026-05-04 09:14:32 WARNING app.cache Redis cache miss rate above 40% over last 5 minutes
+2026-05-04 09:31:18 ERROR app.db Database query timed out after 30000ms — query: SELECT * FROM events WHERE org_id=...
+2026-05-04 10:02:44 INFO  app.service Service worker-payments restarted by supervisor (pid 4821)
+2026-05-04 10:18:07 ERROR app.upload Upload failed for ticket TKT-1f2e3d4c — connection reset by peer
+2026-05-04 11:05:33 WARNING app.disk Disk usage on /var has reached 91% — automatic cleanup triggered
+2026-05-04 11:42:50 ERROR app.network Outbound HTTPS request to api.partner.com timed out after 15000ms
