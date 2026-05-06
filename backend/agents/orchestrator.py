@@ -51,7 +51,6 @@ class AgentState(TypedDict, total=False):
     is_support_request: bool
     requires_automation: bool
     context: str | None
-    context_scores: list | None
     match_strength: Literal["strong", "weak", "none"] | None
     sources: List[dict]
     response: str | None
@@ -116,6 +115,10 @@ def route_after_intake(state: AgentState) -> str:
 
 
 def route_after_knowledge(state: AgentState) -> str:
+    # Explicit ticket requests always need workflow to actually open one,
+    # even if the KB match is weak/missing.
+    if state.get("intent") == "ticket_request":
+        return "workflow"
     if state.get("urgency") == "high" or state.get("severity") == "critical":
         return "workflow"
     if state.get("match_strength") in {"weak", "none"}:
@@ -127,6 +130,10 @@ def route_after_knowledge(state: AgentState) -> str:
 
 def route_after_workflow(state: AgentState) -> str:
     if state.get("automation_status") in {"failed", "manual_required"}:
+        return "escalation"
+    # Critical/high-urgency cases need a human even after a successful
+    # automation — the automation just helps the technician.
+    if state.get("severity") == "critical" or state.get("urgency") == "high":
         return "escalation"
     return "final_response"
 
@@ -207,7 +214,6 @@ def process_message(
         "is_support_request": True,
         "requires_automation": False,
         "context": None,
-        "context_scores": None,
         "match_strength": None,
         "sources": [],
         "response": None,

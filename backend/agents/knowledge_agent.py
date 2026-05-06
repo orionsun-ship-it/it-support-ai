@@ -62,7 +62,6 @@ class KnowledgeAgent:
             result = RetrievalResult(query=query, match_strength="none")
 
         state["context"] = KnowledgeRetriever.format_context(result)
-        state["context_scores"] = [s.to_dict() for s in result.sources]
         state["match_strength"] = result.match_strength
         state["sources"] = [s.to_dict() for s in result.sources]
 

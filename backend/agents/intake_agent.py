@@ -51,7 +51,10 @@ AUTOMATABLE_INTENTS = {
     "password_reset",
     "account_unlock",
     "software_license_check",
+    "software_install",
+    "access_request",
     "vpn_log_check",
+    "status_check",
 }
 
 INTAKE_SYSTEM_PROMPT = f"""\
@@ -77,6 +80,9 @@ Routing examples:
 - "how do I clear my browser cache" -> category=software, intent=knowledge_question
 - "I forgot my password" -> category=password, intent=password_reset
 - "my account is locked" -> category=access, intent=account_unlock
+- "I need Slack installed on my laptop" -> category=software, intent=software_install
+- "I need access to the production database" -> category=access, intent=access_request
+- "what's the status of my tickets?" -> category=other, intent=status_check
 - "VPN is down for the whole team" -> category=vpn, intent=vpn_log_check, urgency=high, severity=critical
 - "please open a ticket for my broken laptop" -> category=hardware, intent=ticket_request
 - "tell me a joke" -> category=other, intent=non_support, is_support_request=false

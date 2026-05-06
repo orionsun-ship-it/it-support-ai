@@ -31,7 +31,10 @@ AUTOMATABLE_INTENTS = {
     "password_reset",
     "account_unlock",
     "software_license_check",
+    "software_install",
+    "access_request",
     "vpn_log_check",
+    "status_check",
 }
 
 
@@ -101,6 +104,18 @@ class WorkflowAgent:
                 "success",
                 "Software license check completed. The assigned license is active.",
             )
+        if intent == "software_install":
+            return (
+                "success",
+                "Software install request submitted to the package portal. "
+                "Approval typically completes within one business hour.",
+            )
+        if intent == "access_request":
+            return (
+                "success",
+                "Access request submitted to the access management team for "
+                "review. You'll receive an email once it's approved.",
+            )
         if intent == "vpn_log_check":
             try:
                 result = self.client.analyze_logs(service="network_events")
@@ -109,6 +124,31 @@ class WorkflowAgent:
             except Exception as exc:  # noqa: BLE001
                 logger.warning("VPN log automation failed: %s", exc)
                 return ("manual_required", "VPN log check could not run automatically.")
+        if intent == "status_check":
+            try:
+                tickets = self.client.list_tickets_for_session(
+                    state.get("session_id") or ""
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("status_check failed: %s", exc)
+                return (
+                    "manual_required",
+                    "Could not look up your ticket status automatically.",
+                )
+            if not tickets:
+                return (
+                    "success",
+                    "You have no tickets open for this session.",
+                )
+            lines = [
+                f"- {t.get('ticket_id')} · {t.get('status')} · "
+                f"priority {t.get('priority')} · {t.get('title','')[:48]}"
+                for t in tickets[:5]
+            ]
+            return (
+                "success",
+                "Here are your tickets for this session:\n" + "\n".join(lines),
+            )
         return ("not_needed", "")
 
     def run(self, state: dict) -> dict:

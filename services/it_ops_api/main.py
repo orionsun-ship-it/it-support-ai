@@ -20,7 +20,7 @@ from sqlmodel import Session, select
 from services.it_ops_api.auth import require_service_token
 from services.it_ops_api.db import get_session, init_db
 from services.it_ops_api.log_analyzer import analyze_logs, get_recent_errors
-from services.it_ops_api.models import AuditLog, Ticket, TicketEvent
+from services.it_ops_api.models import AuditLog, Feedback, Ticket, TicketEvent
 
 app = FastAPI(title="IT Ops API", version="1.0.0")
 
@@ -74,6 +74,13 @@ class AnalyzeLogsBody(BaseModel):
     log_file: str
     severity: Optional[str] = None
     last_n_lines: int = 20
+
+
+class FeedbackBody(BaseModel):
+    session_id: str
+    message_id: str
+    sentiment: str  # "up" | "down"
+    comment: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -266,3 +273,51 @@ def logs_analyze(body: AnalyzeLogsBody) -> dict:
 @app.get("/api/v1/logs/recent_errors", dependencies=[Depends(require_service_token)])
 def logs_recent_errors() -> dict:
     return get_recent_errors()
+
+
+# ---------------------------------------------------------------------------
+# Feedback (token-protected)
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/v1/feedback", dependencies=[Depends(require_service_token)])
+def submit_feedback(
+    body: FeedbackBody, session: Session = Depends(get_session)
+) -> dict:
+    if body.sentiment not in ("up", "down"):
+        raise HTTPException(
+            status_code=400, detail="sentiment must be 'up' or 'down'"
+        )
+    fb = Feedback(
+        session_id=body.session_id,
+        message_id=body.message_id,
+        sentiment=body.sentiment,
+        comment=body.comment,
+    )
+    session.add(fb)
+    session.add(
+        AuditLog(
+            actor="user",
+            action="feedback.submit",
+            target=body.message_id,
+            detail=f"sentiment={body.sentiment}",
+        )
+    )
+    session.commit()
+    session.refresh(fb)
+    return fb.model_dump(mode="json")
+
+
+@app.get("/api/v1/feedback/summary", dependencies=[Depends(require_service_token)])
+def feedback_summary(session: Session = Depends(get_session)) -> dict:
+    rows = session.exec(select(Feedback)).all()
+    total = len(rows)
+    ups = sum(1 for r in rows if r.sentiment == "up")
+    downs = sum(1 for r in rows if r.sentiment == "down")
+    score = (ups / total) if total else 0.0
+    return {
+        "total": total,
+        "thumbs_up": ups,
+        "thumbs_down": downs,
+        "satisfaction_score": round(score, 3),
+    }

@@ -49,3 +49,16 @@ class AuditLog(SQLModel, table=True):
     target: str = ""  # e.g. ticket_id
     detail: str = ""
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Feedback(SQLModel, table=True):
+    """Per-turn user feedback (thumbs up / thumbs down) for satisfaction tracking."""
+
+    __tablename__ = "feedback"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: str = Field(index=True)
+    message_id: str = Field(index=True)  # frontend-generated id of the assistant turn
+    sentiment: str  # "up" | "down"
+    comment: str = ""
+    created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -118,6 +118,15 @@ class SessionState(BaseModel):
     escalated: bool = False
 
 
+class FeedbackCreate(BaseModel):
+    """Per-turn user feedback (thumbs up / thumbs down)."""
+
+    session_id: str
+    message_id: str
+    sentiment: Literal["up", "down"]
+    comment: str = ""
+
+
 class SystemMetrics(BaseModel):
     total_requests: int
     avg_response_time_ms: float
@@ -126,3 +135,7 @@ class SystemMetrics(BaseModel):
     kb_seeded: bool
     uptime_seconds: float
     ops_api_available: bool = True
+    satisfaction_score: float = 0.0
+    feedback_total: int = 0
+    feedback_up: int = 0
+    feedback_down: int = 0

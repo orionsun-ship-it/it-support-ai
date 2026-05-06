@@ -125,6 +125,11 @@ class ItOpsClient:
             logger.warning("ops-api unreachable for list_tickets: %s", exc)
             return []
 
+    def list_tickets_for_session(self, session_id: str) -> list[dict]:
+        """Return tickets that belong to the given session."""
+        all_tickets = self.list_tickets()
+        return [t for t in all_tickets if t.get("session_id") == session_id]
+
     def update_status(self, ticket_id: str, new_status: str) -> dict | None:
         try:
             resp = self._request(
@@ -162,6 +167,40 @@ class ItOpsClient:
         except httpx.RequestError as exc:
             logger.warning("ops-api unreachable for analyze_logs: %s", exc)
             return {"summary": "Log analyzer offline; manual check required."}
+
+    # -- Feedback ---------------------------------------------------------
+
+    def submit_feedback(
+        self,
+        *,
+        session_id: str,
+        message_id: str,
+        sentiment: str,
+        comment: str = "",
+    ) -> dict | None:
+        try:
+            resp = self._request(
+                "POST",
+                "/api/v1/feedback",
+                json={
+                    "session_id": session_id,
+                    "message_id": message_id,
+                    "sentiment": sentiment,
+                    "comment": comment,
+                },
+            )
+            return resp.json()
+        except httpx.RequestError as exc:
+            logger.warning("ops-api unreachable for submit_feedback: %s", exc)
+            return None
+
+    def feedback_summary(self) -> dict:
+        try:
+            resp = self._request("GET", "/api/v1/feedback/summary")
+            return resp.json()
+        except httpx.RequestError as exc:
+            logger.warning("ops-api unreachable for feedback_summary: %s", exc)
+            return {"total": 0, "thumbs_up": 0, "thumbs_down": 0, "satisfaction_score": 0.0}
 
     def is_available(self, timeout: float = 2.0) -> bool:
         try:

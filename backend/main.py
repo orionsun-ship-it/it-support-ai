@@ -16,6 +16,7 @@ from backend.config import get_settings
 from backend.models.schemas import (
     AgentResponse,
     ConversationTurn,
+    FeedbackCreate,
     KBSource,
     SessionState,
     SystemMetrics,
@@ -262,6 +263,8 @@ def metrics() -> SystemMetrics:
         logger.warning("KB count failed: %s", exc)
         kb_seeded = False
 
+    fb = ops_client.feedback_summary() if ops_available else {}
+
     return SystemMetrics(
         total_requests=total_requests,
         avg_response_time_ms=avg_response,
@@ -270,7 +273,41 @@ def metrics() -> SystemMetrics:
         kb_seeded=kb_seeded,
         uptime_seconds=(datetime.now() - app_start_time).total_seconds(),
         ops_api_available=ops_available,
+        satisfaction_score=float(fb.get("satisfaction_score") or 0.0),
+        feedback_total=int(fb.get("total") or 0),
+        feedback_up=int(fb.get("thumbs_up") or 0),
+        feedback_down=int(fb.get("thumbs_down") or 0),
     )
+
+
+@app.post("/feedback")
+def submit_feedback(payload: FeedbackCreate) -> dict:
+    """Record a thumbs-up / thumbs-down on an assistant turn."""
+    result = ops_client.submit_feedback(
+        session_id=payload.session_id,
+        message_id=payload.message_id,
+        sentiment=payload.sentiment,
+        comment=payload.comment,
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=503, detail="ops API is not reachable"
+        )
+    return result
+
+
+@app.patch("/tickets/{ticket_id}/status")
+def update_ticket_status(ticket_id: str, payload: dict) -> dict:
+    """Proxy a ticket status update to the ops API (used by the UI)."""
+    new_status = (payload or {}).get("new_status")
+    if not new_status:
+        raise HTTPException(status_code=400, detail="new_status is required")
+    result = ops_client.update_status(ticket_id, new_status)
+    if result is None:
+        raise HTTPException(
+            status_code=503, detail="ops API is not reachable"
+        )
+    return result
 
 
 @app.get("/sources")

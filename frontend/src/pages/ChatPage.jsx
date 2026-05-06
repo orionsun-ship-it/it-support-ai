@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import useChat from "../hooks/useChat.js";
 
 export default function ChatPage({ sessionId }) {
-  const { messages, isLoading, sendMessage, errorBanner } = useChat(sessionId);
+  const { messages, isLoading, sendMessage, submitFeedback, errorBanner } =
+    useChat(sessionId);
   const [input, setInput] = useState("");
   const scrollRef = useRef(null);
 
@@ -57,7 +58,7 @@ export default function ChatPage({ sessionId }) {
             m.role === "user" ? (
               <UserBubble key={m.id} message={m} />
             ) : (
-              <AssistantBubble key={m.id} message={m} />
+              <AssistantBubble key={m.id} message={m} onFeedback={submitFeedback} />
             )
           )}
 
@@ -270,7 +271,7 @@ function UserBubble({ message }) {
   );
 }
 
-function AssistantBubble({ message }) {
+function AssistantBubble({ message, onFeedback }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -311,21 +312,110 @@ function AssistantBubble({ message }) {
 
       {message.sources && message.sources.length > 0 && <Sources sources={message.sources} />}
 
-      {(message.ticketId || message.escalated) && (
-        <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-          {message.ticketId && (
-            <Chip kind="amber">
-              <TicketGlyph /> <span className="mono">{message.ticketId}</span>
-            </Chip>
-          )}
-          {message.escalated && (
-            <Chip kind="red">
-              <DotIcon /> Escalated
-            </Chip>
-          )}
-        </div>
-      )}
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          marginTop: 2,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        {message.ticketId && (
+          <Chip kind="amber">
+            <TicketGlyph /> <span className="mono">{message.ticketId}</span>
+          </Chip>
+        )}
+        {message.escalated && (
+          <Chip kind="red">
+            <DotIcon /> Escalated
+          </Chip>
+        )}
+        {message.agentName !== "error" && onFeedback && (
+          <FeedbackButtons
+            messageId={message.id}
+            current={message.feedback}
+            onFeedback={onFeedback}
+          />
+        )}
+      </div>
     </div>
+  );
+}
+
+function FeedbackButtons({ messageId, current, onFeedback }) {
+  const baseStyle = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 26,
+    height: 26,
+    background: "transparent",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    cursor: "pointer",
+    color: "var(--text-muted)",
+    transition: "all 120ms ease",
+  };
+  const activeUp = {
+    background: "var(--green-soft)",
+    borderColor: "#6ee7b7",
+    color: "#047857",
+  };
+  const activeDown = {
+    background: "var(--red-soft)",
+    borderColor: "#fca5a5",
+    color: "#b91c1c",
+  };
+  return (
+    <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
+      <button
+        type="button"
+        aria-label="Helpful"
+        title="Helpful"
+        onClick={() => onFeedback(messageId, "up")}
+        disabled={current === "up"}
+        style={{ ...baseStyle, ...(current === "up" ? activeUp : {}) }}
+      >
+        <ThumbsUp />
+      </button>
+      <button
+        type="button"
+        aria-label="Not helpful"
+        title="Not helpful"
+        onClick={() => onFeedback(messageId, "down")}
+        disabled={current === "down"}
+        style={{ ...baseStyle, ...(current === "down" ? activeDown : {}) }}
+      >
+        <ThumbsDown />
+      </button>
+    </div>
+  );
+}
+
+function ThumbsUp() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M7 11v9H4v-9h3zM7 11l4-7c1.5 0 2 1 2 2v4h5a2 2 0 0 1 2 2.3l-1 5a2 2 0 0 1-2 1.7H7"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ThumbsDown() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M17 13V4h3v9h-3zM17 13l-4 7c-1.5 0-2-1-2-2v-4H6a2 2 0 0 1-2-2.3l1-5A2 2 0 0 1 7 5h10"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -610,91 +700,3 @@ function TicketGlyph() {
   );
 }
 
-function RouteTrace({ trace, decisionReason, automationStatus, category, intent }) {
-  const nodes = Array.isArray(trace) ? trace : [];
-  return (
-    <div
-      style={{
-        maxWidth: '84%',
-        background: 'var(--surface-soft)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)',
-        padding: '10px 14px',
-        fontSize: 12,
-        color: 'var(--text-secondary)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 10.5,
-          fontWeight: 600,
-          color: 'var(--text-muted)',
-          letterSpacing: 0.6,
-          textTransform: 'uppercase',
-        }}
-      >
-        Agent route
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
-        {nodes.map((node, i) => (
-          <span key={`${node}-${i}`} style={{ display: 'inline-flex', alignItems: 'center' }}>
-            <span
-              className="mono"
-              style={{
-                padding: '2px 7px',
-                borderRadius: 5,
-                background: node === 'escalation' ? 'var(--red-soft)' : '#eef2ff',
-                color: node === 'escalation' ? '#991b1b' : '#1e40af',
-                fontSize: 11,
-                fontWeight: 500,
-              }}
-            >
-              {node}
-            </span>
-            {i < nodes.length - 1 && (
-              <span style={{ margin: '0 4px', color: 'var(--text-muted)' }}>→</span>
-            )}
-          </span>
-        ))}
-      </div>
-      {(category || intent) && (
-        <div style={{ fontSize: 11.5 }}>
-          {category && (
-            <span>
-              category:{' '}
-              <span className="mono" style={{ color: 'var(--text)' }}>
-                {category}
-              </span>
-            </span>
-          )}
-          {category && intent && <span style={{ color: 'var(--text-muted)' }}>{' · '}</span>}
-          {intent && (
-            <span>
-              intent:{' '}
-              <span className="mono" style={{ color: 'var(--text)' }}>
-                {intent}
-              </span>
-            </span>
-          )}
-        </div>
-      )}
-      {automationStatus && automationStatus !== 'not_needed' && (
-        <div style={{ fontSize: 11.5 }}>
-          automation:{' '}
-          <span className="mono" style={{ color: 'var(--text)' }}>
-            {automationStatus}
-          </span>
-        </div>
-      )}
-      {decisionReason && (
-        <div style={{ fontSize: 11.5 }}>
-          ticket decision:{' '}
-          <span style={{ color: 'var(--text-secondary)' }}>{decisionReason}</span>
-        </div>
-      )}
-    </div>
-  );
-}

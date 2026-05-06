@@ -93,8 +93,14 @@ Example routes:
 | "Tell me a joke"                                   | intake → final_response                              |
 
 Each `/chat` response includes the actual route trace, the ticket-decision
-reason, and the automation status — they're rendered under each assistant
-bubble in the UI for transparency.
+reason, the automation status, and per-turn category/intent classification.
+These fields are inspectable via `curl` and asserted by the test harness:
+
+```bash
+curl -s -X POST http://localhost:8000/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"I forgot my password","session_id":"demo"}' | jq .
+```
 
 ## MCP Integration
 
@@ -207,10 +213,9 @@ it-support-ai/
 ├── services/
 │   └── it_ops_api/       # FastAPI + SQLModel ticketing service
 ├── mcp_server/           # Real MCP server (FastMCP / stdio)
-│   ├── server.py
-│   ├── tools/__init__.py
-│   ├── store.py
-│   └── schemas.py
+│   ├── server.py         # entry point: `python -m mcp_server.server`
+│   ├── tools/__init__.py # @mcp.tool definitions
+│   └── store.py          # shared functional wrapper over the SQLite store
 ├── frontend/             # Vite + React (calm enterprise UI)
 ├── tests/                # accuracy harness with mocked ops client
 ├── docs/MCP_VSCode_Demo.md

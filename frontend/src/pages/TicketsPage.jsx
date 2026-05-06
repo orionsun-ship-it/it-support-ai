@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 
+const STATUSES = ["open", "in_progress", "escalated", "resolved"];
+
 export default function TicketsPage() {
   const [tickets, setTickets] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [openId, setOpenId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
 
   const refresh = async () => {
     setLoading(true);
@@ -20,6 +24,26 @@ export default function TicketsPage() {
     }
   };
 
+  const updateStatus = async (ticketId, newStatus) => {
+    setUpdatingId(ticketId);
+    try {
+      const resp = await fetch(`/api/tickets/${ticketId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ new_status: newStatus }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const updated = await resp.json();
+      setTickets((prev) =>
+        prev.map((t) => (t.ticket_id === ticketId ? { ...t, ...updated } : t))
+      );
+    } catch (err) {
+      setError(`Status update failed: ${err.message || String(err)}`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   useEffect(() => {
     refresh();
   }, []);
@@ -28,10 +52,8 @@ export default function TicketsPage() {
     <div style={{ padding: "32px 32px 40px", maxWidth: 1180, margin: "0 auto" }}>
       <PageHeader
         title="Tickets"
-        subtitle="All issues opened by the assistant or filed manually."
-        right={
-          <RefreshButton onClick={refresh} loading={loading} />
-        }
+        subtitle="All issues opened by the assistant or filed manually. Click a row to view details and change status."
+        right={<RefreshButton onClick={refresh} loading={loading} />}
       />
 
       <div
@@ -65,14 +87,14 @@ export default function TicketsPage() {
         {error && (
           <div
             style={{
-              padding: "20px",
+              padding: "12px 20px",
               color: "#991b1b",
               background: "var(--red-soft)",
               borderBottom: "1px solid #fca5a5",
               fontSize: 13,
             }}
           >
-            Failed to load tickets: {error}
+            {error}
           </div>
         )}
 
@@ -83,6 +105,7 @@ export default function TicketsPage() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "var(--surface-soft)" }}>
+                  <Th />
                   <Th>Ticket ID</Th>
                   <Th>Title</Th>
                   <Th>Category</Th>
@@ -92,65 +115,218 @@ export default function TicketsPage() {
                 </tr>
               </thead>
               <tbody>
-                {tickets.map((t, idx) => (
-                  <tr
-                    key={t.ticket_id}
-                    style={{
-                      borderTop: "1px solid var(--border)",
-                      background: idx % 2 === 0 ? "transparent" : "var(--surface-soft)",
-                    }}
-                    onMouseOver={(e) =>
-                      (e.currentTarget.style.background = "#f0f6ff")
-                    }
-                    onMouseOut={(e) =>
-                      (e.currentTarget.style.background =
-                        idx % 2 === 0 ? "transparent" : "var(--surface-soft)")
-                    }
-                  >
-                    <Td>
-                      <span
-                        className="mono"
+                {tickets.map((t, idx) => {
+                  const isOpen = openId === t.ticket_id;
+                  return (
+                    <>
+                      <tr
+                        key={t.ticket_id}
+                        onClick={() => setOpenId(isOpen ? null : t.ticket_id)}
                         style={{
-                          background: "#f1f5f9",
-                          padding: "2px 7px",
-                          borderRadius: 5,
-                          fontSize: 12,
-                          color: "#0f172a",
+                          borderTop: "1px solid var(--border)",
+                          background:
+                            isOpen
+                              ? "#f0f6ff"
+                              : idx % 2 === 0
+                              ? "transparent"
+                              : "var(--surface-soft)",
+                          cursor: "pointer",
                         }}
                       >
-                        {t.ticket_id}
-                      </span>
-                    </Td>
-                    <Td>
-                      <span style={{ color: "var(--text)" }}>{t.title}</span>
-                    </Td>
-                    <Td>
-                      <span style={{ color: "var(--text-secondary)" }}>
-                        {t.category}
-                      </span>
-                    </Td>
-                    <Td>
-                      <PriorityChip priority={t.priority} />
-                    </Td>
-                    <Td>
-                      <StatusChip status={t.status} />
-                    </Td>
-                    <Td>
-                      <span
-                        className="mono"
-                        style={{ fontSize: 11.5, color: "var(--text-muted)" }}
-                      >
-                        {formatDate(t.created_at)}
-                      </span>
-                    </Td>
-                  </tr>
-                ))}
+                        <Td>
+                          <Chevron open={isOpen} />
+                        </Td>
+                        <Td>
+                          <span
+                            className="mono"
+                            style={{
+                              background: "#f1f5f9",
+                              padding: "2px 7px",
+                              borderRadius: 5,
+                              fontSize: 12,
+                              color: "#0f172a",
+                            }}
+                          >
+                            {t.ticket_id}
+                          </span>
+                        </Td>
+                        <Td>
+                          <span style={{ color: "var(--text)" }}>{t.title}</span>
+                        </Td>
+                        <Td>
+                          <span style={{ color: "var(--text-secondary)" }}>
+                            {t.category}
+                          </span>
+                        </Td>
+                        <Td>
+                          <PriorityChip priority={t.priority} />
+                        </Td>
+                        <Td>
+                          <StatusChip status={t.status} />
+                        </Td>
+                        <Td>
+                          <span
+                            className="mono"
+                            style={{ fontSize: 11.5, color: "var(--text-muted)" }}
+                          >
+                            {formatDate(t.created_at)}
+                          </span>
+                        </Td>
+                      </tr>
+                      {isOpen && (
+                        <tr key={t.ticket_id + "-detail"}>
+                          <td
+                            colSpan={7}
+                            style={{
+                              padding: "16px 20px 20px 56px",
+                              background: "var(--surface-soft)",
+                              borderTop: "1px solid var(--border)",
+                            }}
+                          >
+                            <DetailPanel
+                              ticket={t}
+                              updating={updatingId === t.ticket_id}
+                              onUpdateStatus={(s) => updateStatus(t.ticket_id, s)}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+function DetailPanel({ ticket, updating, onUpdateStatus }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: "var(--text-muted)",
+          letterSpacing: 0.6,
+          textTransform: "uppercase",
+        }}
+      >
+        Description
+      </div>
+      <div
+        style={{
+          fontSize: 13.5,
+          color: "var(--text-secondary)",
+          lineHeight: 1.6,
+          whiteSpace: "pre-wrap",
+          maxWidth: 760,
+        }}
+      >
+        {ticket.description || "(no description)"}
+      </div>
+
+      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", fontSize: 12.5 }}>
+        <Meta label="Severity" value={ticket.severity} />
+        <Meta label="Urgency" value={ticket.urgency} />
+        <Meta label="Session" value={ticket.session_id} mono />
+        {ticket.updated_at && (
+          <Meta label="Updated" value={formatDate(ticket.updated_at)} />
+        )}
+      </div>
+
+      <div
+        style={{
+          marginTop: 4,
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--text-muted)",
+            letterSpacing: 0.6,
+            textTransform: "uppercase",
+            marginRight: 4,
+          }}
+        >
+          Set status
+        </span>
+        {STATUSES.map((s) => {
+          const active = ticket.status === s;
+          return (
+            <button
+              key={s}
+              disabled={updating || active}
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpdateStatus(s);
+              }}
+              style={{
+                padding: "5px 11px",
+                fontSize: 12,
+                fontWeight: 500,
+                borderRadius: 6,
+                cursor: active || updating ? "not-allowed" : "pointer",
+                border: `1px solid ${active ? "var(--brand)" : "var(--border-strong)"}`,
+                background: active ? "var(--brand)" : "var(--surface)",
+                color: active ? "#fff" : "var(--text)",
+              }}
+            >
+              {s.replace("_", " ")}
+            </button>
+          );
+        })}
+        {updating && (
+          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>updating…</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Meta({ label, value, mono }) {
+  return (
+    <div>
+      <span style={{ color: "var(--text-muted)" }}>{label}: </span>
+      <span
+        className={mono ? "mono" : undefined}
+        style={{ color: "var(--text)", fontWeight: mono ? 400 : 500 }}
+      >
+        {value || "—"}
+      </span>
+    </div>
+  );
+}
+
+function Chevron({ open }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      style={{
+        transition: "transform 150ms ease",
+        transform: open ? "rotate(90deg)" : "none",
+        color: "var(--text-muted)",
+      }}
+    >
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -213,13 +389,7 @@ function RefreshButton({ onClick, loading }) {
 
 function EmptyState() {
   return (
-    <div
-      style={{
-        padding: "56px 24px",
-        textAlign: "center",
-        color: "var(--text-muted)",
-      }}
-    >
+    <div style={{ padding: "56px 24px", textAlign: "center", color: "var(--text-muted)" }}>
       <div
         style={{
           width: 48,
@@ -245,7 +415,7 @@ function EmptyState() {
         No tickets yet
       </div>
       <div style={{ marginTop: 4, fontSize: 13 }}>
-        Start a conversation. The assistant will only open a ticket when an issue
+        Start a conversation. The assistant only opens a ticket when an issue
         actually needs follow-up.
       </div>
     </div>
@@ -309,18 +479,7 @@ function StatusChip({ status }) {
   if (status === "escalated") {
     return (
       <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 5,
-          padding: "3px 9px",
-          borderRadius: 999,
-          background: "var(--red-soft)",
-          color: "#991b1b",
-          border: "1px solid #fca5a5",
-          fontSize: 11.5,
-          fontWeight: 500,
-        }}
+        style={pill("var(--red-soft)", "#991b1b", "#fca5a5")}
       >
         <DotInline color="#dc2626" /> escalated
       </span>
@@ -328,42 +487,38 @@ function StatusChip({ status }) {
   }
   if (status === "resolved" || status === "closed") {
     return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 5,
-          padding: "3px 9px",
-          borderRadius: 999,
-          background: "var(--green-soft)",
-          color: "#065f46",
-          border: "1px solid #6ee7b7",
-          fontSize: 11.5,
-          fontWeight: 500,
-        }}
-      >
+      <span style={pill("var(--green-soft)", "#065f46", "#6ee7b7")}>
         <DotInline color="#059669" /> {status}
       </span>
     );
   }
+  if (status === "in_progress") {
+    return (
+      <span style={pill("var(--amber-soft)", "#92400e", "#fcd34d")}>
+        <DotInline color="#d97706" /> in progress
+      </span>
+    );
+  }
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 5,
-        padding: "3px 9px",
-        borderRadius: 999,
-        background: "var(--brand-soft)",
-        color: "#1e40af",
-        border: "1px solid #bfdbfe",
-        fontSize: 11.5,
-        fontWeight: 500,
-      }}
-    >
+    <span style={pill("var(--brand-soft)", "#1e40af", "#bfdbfe")}>
       <DotInline color="#2563eb" /> {status || "open"}
     </span>
   );
+}
+
+function pill(bg, color, border) {
+  return {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 5,
+    padding: "3px 9px",
+    borderRadius: 999,
+    background: bg,
+    color,
+    border: `1px solid ${border}`,
+    fontSize: 11.5,
+    fontWeight: 500,
+  };
 }
 
 function DotInline({ color }) {

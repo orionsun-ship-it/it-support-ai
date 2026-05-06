@@ -12,10 +12,13 @@ function uuid() {
 }
 
 /**
- * Each message has the shape:
- *   { id, role, content, agentName, ticketId, escalated, sources, routeTrace,
- *     finalRoute, ticketDecisionReason, automationStatus, category, intent,
- *     severity, urgency, matchStrength, timestamp }
+ * Each message: { id, role, content, agentName, ticketId, escalated,
+ *                 matchStrength, sources, feedback, timestamp }
+ *
+ * `feedback` is the locally-tracked sentiment ("up" | "down" | null).
+ * The /chat response carries more diagnostic fields (route_trace, intent,
+ * etc.) that are useful for grading / curl introspection but not displayed
+ * in the UI.
  */
 export default function useChat(sessionId) {
   const [messages, setMessages] = useState([]);
@@ -61,14 +64,7 @@ export default function useChat(sessionId) {
             escalated: Boolean(data.escalated),
             matchStrength: data.match_strength ?? null,
             sources: Array.isArray(data.sources) ? data.sources : [],
-            routeTrace: Array.isArray(data.route_trace) ? data.route_trace : [],
-            finalRoute: data.final_route ?? null,
-            ticketDecisionReason: data.ticket_decision_reason ?? null,
-            automationStatus: data.automation_status ?? null,
-            category: data.category ?? null,
-            intent: data.intent ?? null,
-            severity: data.severity ?? null,
-            urgency: data.urgency ?? null,
+            feedback: null,
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -83,7 +79,7 @@ export default function useChat(sessionId) {
             content: 'Sorry — something went wrong contacting the backend. ' + msg,
             agentName: 'error',
             sources: [],
-            routeTrace: [],
+            feedback: null,
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -94,5 +90,39 @@ export default function useChat(sessionId) {
     [sessionId]
   );
 
-  return { sessionId, messages, isLoading, sendMessage, errorBanner };
+  const submitFeedback = useCallback(
+    async (messageId, sentiment) => {
+      // Optimistic update so the UI feels instant.
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, feedback: sentiment } : m))
+      );
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            message_id: messageId,
+            sentiment,
+          }),
+        });
+      } catch (err) {
+        // Roll back on failure.
+        setMessages((prev) =>
+          prev.map((m) => (m.id === messageId ? { ...m, feedback: null } : m))
+        );
+        setErrorBanner('Could not record feedback. Please try again.');
+      }
+    },
+    [sessionId]
+  );
+
+  return {
+    sessionId,
+    messages,
+    isLoading,
+    sendMessage,
+    submitFeedback,
+    errorBanner,
+  };
 }

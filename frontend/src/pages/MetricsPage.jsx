@@ -143,6 +143,29 @@ export default function MetricsPage() {
             icon={<HeartGlyph />}
             sub={metrics.ops_api_available ? "Ops API healthy" : "Ops API unreachable"}
           />
+          <Card
+            label="User satisfaction"
+            value={
+              (metrics.feedback_total || 0) === 0
+                ? "—"
+                : `${Math.round((metrics.satisfaction_score || 0) * 100)}%`
+            }
+            accent={
+              (metrics.feedback_total || 0) === 0
+                ? "neutral"
+                : (metrics.satisfaction_score || 0) >= 0.7
+                ? "green"
+                : (metrics.satisfaction_score || 0) >= 0.4
+                ? "amber"
+                : "red"
+            }
+            icon={<ThumbGlyph />}
+            sub={
+              (metrics.feedback_total || 0) === 0
+                ? "No feedback yet"
+                : `${metrics.feedback_up || 0} up · ${metrics.feedback_down || 0} down`
+            }
+          />
         </div>
       )}
     </div>
@@ -304,6 +327,18 @@ function HeartGlyph() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
       <path
         d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+function ThumbGlyph() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M7 11v9H4v-9h3zM7 11l4-7c1.5 0 2 1 2 2v4h5a2 2 0 0 1 2 2.3l-1 5a2 2 0 0 1-2 1.7H7"
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinejoin="round"
