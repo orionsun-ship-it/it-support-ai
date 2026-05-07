@@ -36,13 +36,6 @@ reminded if you forget). The Claude model defaults to `claude-haiku-4-5-20251001
 — change `CHAT_MODEL` in `.env` to `claude-sonnet-4-6` or `claude-opus-4-6`
 for harder questions.
 
-To run the real MCP server (for VS Code / Claude Desktop demos), in a separate
-terminal:
-
-```bash
-make mcp    # python -m mcp_server.server
-```
-
 Setup details, alternative paths, and clean-up are in
 [`docs/MCP_VSCode_Demo.md`](docs/MCP_VSCode_Demo.md).
 
