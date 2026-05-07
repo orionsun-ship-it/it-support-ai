@@ -11,7 +11,7 @@ UX, MCP-proof, industry-comparison, validation, and presentation companions
 that map 1:1 to the eight grading checkpoints. A grader who only reads
 [`docs/PRESENTATION.md`](docs/PRESENTATION.md) will get the full picture.
 
-## Repository tour for graders
+## Repository tour 
 
 | Checkpoint                                | Where                                                                       |
 | ----------------------------------------- | --------------------------------------------------------------------------- |
