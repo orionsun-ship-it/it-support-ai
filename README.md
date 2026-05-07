@@ -6,11 +6,6 @@ IT Ops API backed by SQLite, a sentence-transformers + ChromaDB knowledge
 base, and a real **Model Context Protocol** server that exposes the same
 ticketing/log tools to VS Code and Claude Desktop.
 
-This is a capstone project. See the [docs/](docs/) folder for product,
-UX, MCP-proof, industry-comparison, validation, and presentation companions
-that map 1:1 to the eight grading checkpoints. A grader who only reads
-[`docs/PRESENTATION.md`](docs/PRESENTATION.md) will get the full picture.
-
 ## Repository tour 
 
 | Checkpoint                                | Where                                                                       |
