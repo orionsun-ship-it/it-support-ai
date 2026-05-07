@@ -148,31 +148,6 @@ curl -s -X POST http://localhost:8000/chat \
   -H 'Content-Type: application/json' \
   -d '{"message":"I forgot my password","session_id":"demo"}' | jq .
 ```
-
-## Simulated automations (be honest about what's real)
-
-Most automations in this capstone are **stubs** that return canned success
-strings. They are tagged `automation_simulated: true` in the API response,
-their text is prefixed `[Simulated]`, and the chat UI surfaces a
-`Simulated automation` chip on every such turn. Two intents do call real
-subsystems:
-
-| Intent                  | Status      | What actually happens                                                    |
-| ----------------------- | ----------- | ------------------------------------------------------------------------ |
-| `password_reset`        | Simulated   | Returns a canned "[Simulated] Password reset link sent" message.         |
-| `account_unlock`        | Simulated   | Returns a canned "[Simulated] Account unlock submitted" message.         |
-| `software_license_check`| Simulated   | Returns a canned "[Simulated] License is active" message.                |
-| `software_install`      | Simulated   | Returns a canned "[Simulated] Install request submitted" message.        |
-| `access_request`        | Simulated   | Returns a canned "[Simulated] Access request submitted" message.         |
-| `vpn_log_check`         | **Real**    | Reads sample log files via the IT Ops API `/api/v1/logs/analyze` route.  |
-| `status_check`          | **Real**    | Queries the actual ticket DB via the IT Ops API.                         |
-
-In a production deployment the simulated paths would call enterprise
-identity, asset-management, and access-management systems via their own
-adapters. The architecture treats automations as a list of pluggable
-intent handlers, so adding a real one is a localised change in
-`backend/agents/workflow_agent.py`.
-
 ## MCP integration
 
 The repo includes a real MCP server (`mcp_server/server.py`) built on
