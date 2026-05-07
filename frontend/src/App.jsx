@@ -69,13 +69,20 @@ export default function App() {
         style={{
           flex: 1,
           minWidth: 0,
-          overflow: "auto",
+          overflow: activePage === "chat" ? "hidden" : "auto",
           background: "var(--bg)",
         }}
       >
-        {activePage === "chat" && (
+        {/* Always mounted so useChat state (message history) survives tab switches */}
+        <div
+          style={{
+            display: activePage === "chat" ? "flex" : "none",
+            flexDirection: "column",
+            height: "100%",
+          }}
+        >
           <ChatPage key={sessionId} sessionId={sessionId} />
-        )}
+        </div>
         {activePage === "tickets" && <TicketsPage />}
         {activePage === "metrics" && <MetricsPage />}
         {activePage === "sources" && <SourcesPage />}

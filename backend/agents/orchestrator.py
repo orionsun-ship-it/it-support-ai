@@ -5,28 +5,41 @@ Branching:
     START
       ↓
     intake
-      ├── is_support_request == False                       → final_response
-      ├── confidence < 0.55 OR category in {None, "other"}  → escalation
-      └── otherwise                                          → knowledge
+      ├── is_support_request == False           → final_response
+      └── otherwise                             → knowledge
 
     knowledge
-      ├── urgency == high OR severity == critical           → workflow
-      ├── match_strength in {"weak","none"}                 → escalation
-      ├── requires_automation                               → workflow
-      └── otherwise                                          → final_response
+      ├── intent == ticket_request              → workflow
+      ├── requires_automation                   → workflow
+      ├── user already tried & stuck            → escalation
+      └── otherwise                             → final_response
 
     workflow
-      ├── automation failed OR manual_required              → escalation
-      ├── should_create_ticket  -> include in answer        → final_response
-      └── otherwise                                          → final_response
+      ├── automation failed / manual_required   → escalation
+      ├── severity=critical OR urgency=high     → escalation
+      └── otherwise                             → final_response
 
     escalation → final_response → END
+
+Escalation triggers:
+- The automation step explicitly fails or requires manual approval, OR
+- The originating request is critical-severity or high-urgency (a ticket
+  alone is not enough — a human handoff is also needed), OR
+- The user has confirmed the suggested fix did not resolve the issue.
 """
 
 from __future__ import annotations
 
 import time
 from typing import Any, List, Literal, TypedDict
+
+_STUCK_PHRASES = (
+    "still not working", "still broken", "didn't work", "did not work",
+    "doesn't work", "does not work", "no luck", "still the same",
+    "same issue", "same problem", "same error", "still happening",
+    "not fixed", "still stuck", "tried that", "already tried",
+    "not resolved", "not solved", "still failing",
+)
 
 from langgraph.graph import END, START, StateGraph
 
@@ -59,6 +72,7 @@ class AgentState(TypedDict, total=False):
     ticket_decision_reason: str | None
     automation_status: Literal["not_needed", "success", "failed", "manual_required"] | None
     automation_result: str | None
+    automation_simulated: bool
     ops_api_unavailable: bool
     escalated: bool
     response_time_ms: float
@@ -94,45 +108,48 @@ def final_response_node(state: AgentState) -> AgentState:
 # ---------------------------------------------------------------------------
 
 
+def _user_is_stuck(state: AgentState) -> bool:
+    """Return True if the user has already tried our suggestion and it failed."""
+    history = state.get("history") or []
+    user_msg = (state.get("user_message") or "").lower()
+
+    # Explicit escalation / human request is always honoured.
+    if any(w in user_msg for w in ("escalate", "human agent", "real person", "speak to someone")):
+        return True
+
+    # Only consider "still stuck" signals when there's at least one prior exchange.
+    has_prior_assistant = any(h.get("role") == "assistant" for h in history)
+    if not has_prior_assistant:
+        return False
+
+    return any(phrase in user_msg for phrase in _STUCK_PHRASES)
+
+
 def route_after_intake(state: AgentState) -> str:
     if not state.get("is_support_request", True):
         return "final_response"
-
-    confidence = float(state.get("confidence") or 0.0)
-    urgency = state.get("urgency")
-    severity = state.get("severity")
-    category = state.get("category")
-
-    # Always route urgent/critical through knowledge so we still try to answer.
-    if urgency == "high" or severity == "critical":
-        return "knowledge"
-
-    # Fall straight to escalation when intake is uncertain.
-    if confidence < 0.55 or category in {None, "unknown", "other"}:
-        return "escalation"
-
+    # Always try the knowledge base first; escalation happens only after the
+    # user confirms the suggestion didn't resolve their issue.
     return "knowledge"
 
 
 def route_after_knowledge(state: AgentState) -> str:
-    # Explicit ticket requests always need workflow to actually open one,
-    # even if the KB match is weak/missing.
     if state.get("intent") == "ticket_request":
         return "workflow"
-    if state.get("urgency") == "high" or state.get("severity") == "critical":
-        return "workflow"
-    if state.get("match_strength") in {"weak", "none"}:
-        return "escalation"
     if state.get("requires_automation"):
         return "workflow"
+    # Only escalate when the user has already tried our answer and is still stuck.
+    if _user_is_stuck(state):
+        return "escalation"
     return "final_response"
 
 
 def route_after_workflow(state: AgentState) -> str:
     if state.get("automation_status") in {"failed", "manual_required"}:
         return "escalation"
-    # Critical/high-urgency cases need a human even after a successful
-    # automation — the automation just helps the technician.
+    # Critical severity or high urgency cases need human follow-up even when
+    # the automation step reports success — a real engineer should pick the
+    # ticket up regardless of the canned fix.
     if state.get("severity") == "critical" or state.get("urgency") == "high":
         return "escalation"
     return "final_response"
@@ -222,6 +239,7 @@ def process_message(
         "ticket_decision_reason": None,
         "automation_status": None,
         "automation_result": None,
+        "automation_simulated": False,
         "ops_api_unavailable": False,
         "escalated": False,
         "response_time_ms": 0.0,

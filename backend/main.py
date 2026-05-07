@@ -37,7 +37,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins_list,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PATCH"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Content-Type", "Authorization"],
 )
 
@@ -205,6 +205,7 @@ def chat(payload: UserMessage) -> AgentResponse:
         final_route=state.get("final_route"),
         ticket_decision_reason=state.get("ticket_decision_reason"),
         automation_status=state.get("automation_status"),
+        automation_simulated=bool(state.get("automation_simulated")),
     )
 
 
@@ -252,10 +253,11 @@ def metrics() -> SystemMetrics:
         if total_requests
         else 0.0
     )
-    total_escalations = sum(1 for r in request_log if r["escalated"])
+    # Count unique escalated sessions, not per-message escalation flags.
+    total_escalations = sum(1 for s in sessions.values() if s.escalated)
 
     ops_available = ops_client.is_available(timeout=2.0)
-    total_tickets = len(ops_client.list_tickets()) if ops_available else 0
+    total_tickets = len(ops_client.list_tickets())
 
     try:
         kb_seeded = KnowledgeRetriever().count() > 0
@@ -263,7 +265,7 @@ def metrics() -> SystemMetrics:
         logger.warning("KB count failed: %s", exc)
         kb_seeded = False
 
-    fb = ops_client.feedback_summary() if ops_available else {}
+    fb = ops_client.feedback_summary()
 
     return SystemMetrics(
         total_requests=total_requests,
@@ -294,6 +296,17 @@ def submit_feedback(payload: FeedbackCreate) -> dict:
             status_code=503, detail="ops API is not reachable"
         )
     return result
+
+
+@app.delete("/tickets/{ticket_id}")
+def delete_ticket_endpoint(ticket_id: str) -> dict:
+    """Delete a ticket via the ops API."""
+    deleted = ops_client.delete_ticket(ticket_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=404, detail=f"Ticket {ticket_id} not found or ops API unreachable"
+        )
+    return {"deleted": True, "ticket_id": ticket_id}
 
 
 @app.patch("/tickets/{ticket_id}/status")

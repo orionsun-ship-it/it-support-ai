@@ -7,15 +7,15 @@
       "category": "password",
       "source": "internal-kb",
       "version": "2024-09-01",
-      "body": "Password reset procedure: Go to https://portal.company.com/reset, enter your corporate email, and follow the link sent to your registered email. Reset links expire after 30 minutes. If the link expired, request a new one. Passwords must be at least 12 characters with one uppercase letter, one number, and one symbol."
+      "body": "Password reset procedure: Go to https://portal.company.com/reset, enter your corporate email, and follow the link sent to your registered email. Reset links expire after 30 minutes. If the link expired, request a new one. Passwords must be at least 12 characters and include one uppercase letter, one number, and one symbol. Do not reuse recent passwords or share a password with IT. If you cannot access your registered email, verify your identity with the helpdesk before the account is changed."
     },
     {
       "doc_id": "kb-002",
-      "title": "VPN setup with Cisco AnyConnect",
+      "title": "VPN setup with Cisco Secure Client / AnyConnect",
       "category": "network",
       "source": "internal-kb",
       "version": "2024-08-15",
-      "body": "VPN setup steps: 1) Install Cisco AnyConnect from the company app catalog. 2) Connect to vpn.company.com. 3) Enter your corporate username and password. 4) Approve the MFA push on your phone. If the push never arrives, check that you are connected to the internet and that the Duo Mobile app is signed in."
+      "body": "VPN setup steps: 1) Install Cisco Secure Client, formerly Cisco AnyConnect, from the company app catalog. 2) Open the client and connect to vpn.company.com. 3) Enter your corporate username and password. 4) Approve the MFA prompt on your phone. If the push never arrives, confirm you have internet access, open Duo Mobile or Microsoft Authenticator directly, and verify the phone time is set automatically. If connection fails repeatedly, capture the exact error and contact IT."
     },
     {
       "doc_id": "kb-003",
@@ -23,7 +23,7 @@
       "category": "software",
       "source": "internal-kb",
       "version": "2024-07-10",
-      "body": "Software installation error 1603: This indicates a fatal error during MSI install, usually caused by a previous failed install. Resolution: open Add/Remove Programs, remove any partial install, reboot, and re-run the installer as Administrator. Check %TEMP%\\MSI*.log for the exact failing component."
+      "body": "Software installation error 1603 indicates a fatal MSI installation error, commonly caused by a previous failed install, missing permissions, a locked file, or a reboot pending. Resolution: remove any partial install in Apps & features, reboot, close Office/browsers/VPN clients if relevant, and run the installer as Administrator. Check %TEMP%\\MSI*.log or the vendor install log for the exact failing component. Escalate with the app name, version, log file, and screenshot."
     },
     {
       "doc_id": "kb-004",
@@ -31,7 +31,7 @@
       "category": "hardware",
       "source": "internal-kb",
       "version": "2024-06-22",
-      "body": "Printer troubleshooting: 1) Confirm the printer has paper and no jam. 2) Restart the print spooler service (services.msc -> Print Spooler -> Restart). 3) Remove and re-add the printer from Settings -> Printers & scanners. 4) For network printers, ping the printer IP to confirm reachability."
+      "body": "Printer troubleshooting: 1) Confirm the printer is powered on, has paper and toner, and shows no jam or error on the panel. 2) Restart the print spooler service from services.msc or reboot the device. 3) Remove and re-add the printer from Settings > Bluetooth & devices > Printers & scanners. 4) For network printers, ping the printer IP and confirm you are on VPN or the office network. Escalate if multiple users cannot print to the same device."
     },
     {
       "doc_id": "kb-005",
@@ -39,7 +39,7 @@
       "category": "access",
       "source": "internal-kb",
       "version": "2024-09-15",
-      "body": "Account lockout resolution: Accounts lock after 5 failed login attempts and automatically unlock after 15 minutes. To unlock immediately, request unlock from the IT self-service portal or call the helpdesk. After unlock, change your password if you suspect any unauthorized attempts."
+      "body": "Account lockout resolution: Accounts lock after 5 failed sign-in attempts and automatically unlock after 15 minutes. To unlock immediately, request unlock from the IT self-service portal or call the helpdesk. After unlock, wait two minutes before retrying and update saved passwords on phones, mail apps, VPN clients, mapped drives, and browsers. Change your password if you suspect unauthorized attempts or see MFA prompts you did not initiate."
     },
     {
       "doc_id": "kb-006",
@@ -47,7 +47,7 @@
       "category": "software",
       "source": "internal-kb",
       "version": "2024-05-30",
-      "body": "Windows error 0x80070005 means 'Access Denied'. It typically appears during Windows Update or file operations and is caused by missing permissions or a corrupted user profile. Fix: run the troubleshooter (Settings -> Update & Security -> Troubleshoot), reset Windows Update components, or run sfc /scannow."
+      "body": "Windows error 0x80070005 means Access Denied. It often appears during Windows Update, application install, Store app updates, file copy, or profile operations when permissions are missing or system files are damaged. Fix: restart, run the action as Administrator when appropriate, check folder permissions, run Windows Update Troubleshooter, then run sfc /scannow and DISM /Online /Cleanup-Image /RestoreHealth. Escalate with event logs and screenshots."
     },
     {
       "doc_id": "kb-007",
@@ -55,7 +55,7 @@
       "category": "network",
       "source": "internal-kb",
       "version": "2024-08-01",
-      "body": "Network connectivity troubleshooting: 1) Check the wifi/ethernet icon. 2) Run `ipconfig /all` and confirm a valid IP and gateway. 3) Try `ping 8.8.8.8` to test external connectivity. 4) Try `nslookup company.com` to test DNS. 5) If DNS fails, run `ipconfig /flushdns` and retry."
+      "body": "Network connectivity troubleshooting: 1) Check the Wi-Fi/Ethernet icon and confirm airplane mode is off. 2) Run ipconfig /all and confirm a valid IP address, gateway, and DNS server. 3) Ping the default gateway, then 8.8.8.8, to test local and external connectivity. 4) Run nslookup company.com to test DNS. 5) If DNS fails, run ipconfig /flushdns and reconnect. Collect SSID, IP address, location, and error messages before escalation."
     },
     {
       "doc_id": "kb-008",
@@ -63,7 +63,7 @@
       "category": "hardware",
       "source": "internal-kb",
       "version": "2024-04-20",
-      "body": "Disk space warnings: Windows shows a warning when the system drive falls below 10% free. Clear space by emptying the Recycle Bin, running Disk Cleanup, removing old Windows update files, and uninstalling unused applications. For laptops with small SSDs, move the OneDrive cache and Downloads folder to an external drive."
+      "body": "Disk space warnings: Windows commonly warns when the system drive is low on free space. Clear space by emptying Recycle Bin, running Settings > System > Storage > Cleanup recommendations, removing old Windows update files, uninstalling unused apps, and moving large personal files to OneDrive or approved storage. Do not delete C:\\Windows, C:\\Program Files, or unknown system folders. Escalate if free space returns to low levels quickly or disk health warnings appear."
     },
     {
       "doc_id": "kb-009",
@@ -71,7 +71,7 @@
       "category": "access",
       "source": "internal-kb",
       "version": "2024-10-01",
-      "body": "Multi-factor authentication (MFA) setup: 1) Install Microsoft Authenticator on your phone. 2) Visit https://aka.ms/mfasetup and sign in. 3) Add an account -> Work or school -> Scan QR code. 4) Approve the test push. Use the recovery codes you are shown to store somewhere safe in case you lose your phone."
+      "body": "Multi-factor authentication setup: 1) Install Microsoft Authenticator on your phone. 2) Visit https://aka.ms/mfasetup and sign in. 3) Add an account > Work or school account > Scan QR code. 4) Approve the test notification. Add at least one backup method such as phone call, text, passkey, or security key if allowed by policy. Store recovery codes securely. IT will never ask you to approve an MFA prompt you did not start."
     },
     {
       "doc_id": "kb-010",
@@ -79,7 +79,7 @@
       "category": "software",
       "source": "internal-kb",
       "version": "2024-09-12",
-      "body": "Common Outlook issues: If Outlook will not open, start it in safe mode (`outlook.exe /safe`) to rule out add-ins. For 'Cannot connect to Exchange', delete the Outlook profile in Control Panel -> Mail and recreate it. For missing emails, check the Junk folder and the Search filters."
+      "body": "Common Outlook issues: If Outlook will not open, start it in safe mode with outlook.exe /safe to rule out add-ins. For Cannot connect to Exchange, confirm internet/VPN, check Microsoft 365 service status if available, then recreate the profile from Control Panel > Mail. For missing mail, check Junk, Deleted Items, Focused/Other, rules, filters, and online mailbox search. Escalate with Outlook version, error text, and whether Outlook on the web works."
     },
     {
       "doc_id": "kb-011",
@@ -87,7 +87,7 @@
       "category": "network",
       "source": "internal-kb",
       "version": "2024-07-25",
-      "body": "Remote desktop connection steps: 1) Confirm the target machine has Remote Desktop enabled (System -> Remote settings). 2) Connect to VPN. 3) Open mstsc.exe. 4) Enter the machine name (e.g. PC-12345.corp.local). 5) Authenticate with your domain credentials. If the host is unreachable, ping it first."
+      "body": "Remote Desktop connection steps: 1) Confirm the target machine is powered on and Remote Desktop is enabled. 2) Connect to VPN. 3) Open mstsc.exe. 4) Enter the machine name, for example PC-12345.corp.local. 5) Authenticate with domain credentials. If the host is unreachable, ping it and confirm DNS resolves. If credentials fail, verify you are allowed to RDP to that host. Escalate with target name, IP, error, and time attempted."
     },
     {
       "doc_id": "kb-012",
@@ -95,7 +95,7 @@
       "category": "software",
       "source": "internal-kb",
       "version": "2024-06-05",
-      "body": "Browser cache clearing: In Chrome/Edge press Ctrl+Shift+Delete, choose 'All time', tick Cached images and files and Cookies, and click Clear data. This resolves many login loops, broken layouts, and stale single-sign-on issues."
+      "body": "Browser cache clearing: In Chrome or Edge press Ctrl+Shift+Delete, choose All time, select Cached images and files plus Cookies and other site data, then click Clear data. This often resolves login loops, stale single-sign-on sessions, broken layouts, and old redirects. Warn the user they may be signed out of websites. For one site only, use site settings or an InPrivate/Incognito test first to avoid clearing all saved sessions."
     },
     {
       "doc_id": "kb-013",
@@ -103,7 +103,7 @@
       "category": "software",
       "source": "internal-kb",
       "version": "2024-09-20",
-      "body": "Microsoft Teams audio issues: 1) Open Teams -> Settings -> Devices and confirm the right microphone and speaker are selected. 2) Run a Test call. 3) If you cannot be heard, check Windows Privacy -> Microphone and ensure Teams is allowed. 4) Reinstall Teams if device list is empty."
+      "body": "Microsoft Teams audio issues: 1) Open Teams > Settings > Devices and confirm the correct microphone, speaker, and headset are selected. 2) Run a test call. 3) Check Windows Settings > Privacy & security > Microphone and allow Teams. 4) Close other apps that may be using the device. 5) Reconnect USB/Bluetooth devices and update drivers. If the device list is empty or audio fails only in Teams, clear the Teams cache or reinstall Teams."
     },
     {
       "doc_id": "kb-014",
@@ -111,7 +111,7 @@
       "category": "software",
       "source": "internal-kb",
       "version": "2024-08-30",
-      "body": "OneDrive sync problems: A red X on a OneDrive file means sync failed. Right-click the OneDrive icon in the system tray -> Settings -> Account -> Unlink this PC, then sign back in to repair the sync state. Files larger than 250 GB or with reserved characters in the name will not sync."
+      "body": "OneDrive sync problems: A red X means a file did not sync. Click the OneDrive cloud icon to read the exact error. Common causes include invalid characters, path length, insufficient permissions, low disk space, paused sync, or a file open in another app. Try Pause syncing > Resume syncing, restart OneDrive, rename the file, and sign out/in. Files up to 250 GB can sync, subject to tenant policy and available storage. Escalate if many users see the same library issue."
     },
     {
       "doc_id": "kb-015",
@@ -119,7 +119,7 @@
       "category": "hardware",
       "source": "internal-kb",
       "version": "2024-05-15",
-      "body": "Blue Screen of Death (BSOD) guidance: Note the stop code shown on the blue screen (for example PAGE_FAULT_IN_NONPAGED_AREA). Common fixes: update or roll back device drivers, run `chkdsk /f`, and run `sfc /scannow`. If BSODs are repeated, collect the minidump from C:\\Windows\\Minidump and contact IT for analysis."
+      "body": "Blue Screen guidance: Note the stop code shown on the blue screen, such as PAGE_FAULT_IN_NONPAGED_AREA or CRITICAL_PROCESS_DIED. Common fixes include installing Windows and driver updates, rolling back a recently changed driver, checking hardware connections, running chkdsk /f, and running sfc /scannow. If BSODs repeat, collect C:\\Windows\\Minidump files, device model, recent changes, and the exact stop code for IT analysis."
     },
     {
       "doc_id": "kb-016",
@@ -127,7 +127,919 @@
       "category": "network",
       "source": "internal-kb",
       "version": "2024-07-08",
-      "body": "DNS troubleshooting: If you can ping IPs but not hostnames, DNS is broken. Run `ipconfig /flushdns`, then `ipconfig /registerdns`. If still broken, set DNS to the corporate resolver (10.0.0.53) or a public one (1.1.1.1, 8.8.8.8) under adapter properties -> IPv4 -> Use the following DNS server addresses."
+      "body": "DNS troubleshooting: If IP addresses work but hostnames do not, DNS is likely failing. Run ipconfig /flushdns, then ipconfig /registerdns on domain-joined Windows devices. Verify the DNS servers from ipconfig /all and confirm they match corporate guidance when on VPN or office LAN. Test with nslookup intranet.company.com and nslookup company.com. Avoid hardcoding public DNS on managed devices unless IT instructs it, because internal names may stop resolving."
+    },
+    {
+      "doc_id": "kb-017",
+      "title": "New hire IT setup checklist",
+      "category": "onboarding",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "New hire setup checklist: Confirm the user identity, start date, manager, department, location, role, and required applications. Ensure the account is active, licenses are assigned, MFA registration is complete, and device enrollment is finished before first login. Provide instructions for email, Teams, VPN, password reset, printer access, and file locations. Verify access to role-specific systems with the manager. Track missing apps or permissions as separate requests."
+    },
+    {
+      "doc_id": "kb-018",
+      "title": "Employee offboarding and access removal",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Offboarding checklist: Disable sign-in at the approved termination time, revoke active sessions and refresh tokens, remove group memberships, transfer mailbox/files to the manager if policy allows, and collect company devices. Preserve data under retention or legal hold rules; do not delete mailboxes, drives, or user data unless authorized. Remove VPN, admin, SaaS, and shared mailbox access. Document actions, timestamps, requester, and approvals in the ticket."
+    },
+    {
+      "doc_id": "kb-019",
+      "title": "Identity verification before account changes",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Identity verification rule: Before resetting passwords, changing MFA methods, unlocking privileged accounts, or disclosing account details, verify the requester using approved factors such as employee ID, manager confirmation, HR record, callback to registered phone, or in-person badge. Do not use information supplied only in the current chat as proof. If verification fails or feels suspicious, pause the change, create a security ticket, and notify the security team."
+    },
+    {
+      "doc_id": "kb-020",
+      "title": "Lost or stolen company device",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Lost or stolen device response: Ask for device type, asset tag, serial number if known, last known location/time, whether it contained sensitive data, and whether police or building security were notified. Immediately report to IT security so the device can be locked, wiped, or marked lost in MDM. Reset affected passwords, revoke sessions, and review sign-in logs. Do not wait for the device to reappear before reporting. Document all actions and user contact details."
+    },
+    {
+      "doc_id": "kb-021",
+      "title": "Suspected phishing email",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Phishing response: Do not click links, open attachments, reply, or forward externally. Use the Report Phishing button in Outlook if available, or forward the message as an attachment to the security mailbox. If the user clicked a link or entered credentials, treat it as urgent: disconnect from suspicious sessions, change the password, revoke sessions, check MFA methods, and notify security. Preserve the original message headers for investigation."
+    },
+    {
+      "doc_id": "kb-022",
+      "title": "Malware or ransomware suspicion",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Malware or ransomware suspicion: If files are encrypting, antivirus alerts repeat, or unusual pop-ups appear, disconnect the device from Wi-Fi/Ethernet but do not power it off unless security instructs. Capture screenshots, note the time, and call IT security immediately. Do not plug in USB drives or attempt cleanup with unapproved tools. Security should isolate the endpoint, collect logs, check backups, reset exposed credentials, and determine whether other systems are affected."
+    },
+    {
+      "doc_id": "kb-023",
+      "title": "Unexpected MFA prompt or MFA fatigue",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Unexpected MFA prompt: Deny the request unless you personally started the sign-in. Repeated prompts may indicate a password spray or compromised password. Change your password from a trusted device, report the incident to security, and review recent sign-ins and MFA methods. IT should revoke sessions and confirm no new authentication methods were added. Never approve a push to make notifications stop; approval can grant an attacker access."
+    },
+    {
+      "doc_id": "kb-024",
+      "title": "Local administrator rights request",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Admin rights request: Local administrator access is granted only when business need is approved and lower-risk options are insufficient. Ask for the application, task, device, duration, vendor requirement, and manager approval. Prefer app catalog deployment, temporary elevation, privileged access workflow, or IT-assisted install over permanent admin rights. Never share local admin passwords in chat or email. Record approval, scope, duration, and removal date."
+    },
+    {
+      "doc_id": "kb-025",
+      "title": "Shared mailbox access",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Shared mailbox access: Confirm the mailbox name, requested permission, business reason, and manager or mailbox owner approval. Use Full Access for opening the mailbox and Send As or Send on Behalf only when needed. After access is granted, Outlook may auto-map the mailbox; otherwise add it from Account Settings or open it in Outlook on the web. If the mailbox appears but sending fails, confirm the send permission and allow time for propagation."
+    },
+    {
+      "doc_id": "kb-026",
+      "title": "Calendar delegate permissions",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Calendar delegate permissions: Ask which calendar, delegate name, permission level, and whether the delegate should receive meeting requests. Reviewer can read; Editor can create and modify; Delegate can respond to meetings if configured. In Outlook, go to Calendar properties or Account Settings > Delegate Access. For executives or shared calendars, require owner approval. If changes do not appear, restart Outlook and check Outlook on the web."
+    },
+    {
+      "doc_id": "kb-027",
+      "title": "Distribution list and Microsoft 365 group membership",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Group membership requests: Capture the group name, requester, target user, reason, and approval from the group owner or manager. Distribution lists are mainly for email delivery; Microsoft 365 groups may also grant mailbox, SharePoint, Teams, Planner, or application access. Warn that group changes can take time to propagate. If the user still lacks access, confirm nested group limitations, license assignment, and whether the app reads groups from Entra ID or another source."
+    },
+    {
+      "doc_id": "kb-028",
+      "title": "Outlook mailbox full",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Mailbox full: Ask whether the user sees send failure, receive failure, or quota warnings. Check mailbox size, Deleted Items, Sent Items, large attachments, and archive mailbox status. Use Mailbox Cleanup, empty Deleted Items, save large attachments to OneDrive/SharePoint, and move older mail to Online Archive if enabled. Do not delete business records that may be under retention. If quota is still insufficient, request archive enablement, quota review, or license adjustment."
+    },
+    {
+      "doc_id": "kb-029",
+      "title": "Outlook search not finding messages",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Outlook search issue: First test search in Outlook on the web. If web search works, the local Outlook index or profile may be the issue. Restart Outlook, clear filters, search All Mailboxes, rebuild the Windows Search index, and ensure Cached Exchange Mode has downloaded enough mail. Try Outlook safe mode to disable add-ins. If both desktop and web search fail, check mailbox indexing or service health and escalate with sample missing message details."
+    },
+    {
+      "doc_id": "kb-030",
+      "title": "Outlook stuck on loading profile",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Outlook stuck on Loading Profile: Start Outlook in safe mode with outlook.exe /safe. Disable suspicious add-ins, check network/VPN, and ensure the mailbox opens in Outlook on the web. If safe mode fails, create a new Outlook profile from Control Panel > Mail > Show Profiles. Rename old OST files only after Outlook is closed. Escalate if profile recreation fails or the same issue occurs on multiple devices."
+    },
+    {
+      "doc_id": "kb-031",
+      "title": "Email delivery failure or NDR",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Email delivery failure: Ask for the complete non-delivery report, sender, recipient, subject, time sent, and whether it is internal or external. Common causes include bad address, full mailbox, blocked attachment, message too large, SPF/DKIM/DMARC failure, transport rule, or recipient server rejection. Do not retry large messages repeatedly. Use the NDR code to route the issue to messaging admins, security, or the recipient organization."
+    },
+    {
+      "doc_id": "kb-032",
+      "title": "Spam quarantine release request",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Spam quarantine request: Verify the sender, recipient, subject, date, and business reason before releasing. Check whether the message is spam, phishing, malware, impersonation, or bulk mail. Release only messages that pass security review and policy. For false positives, submit to the mail security gateway and consider allow-listing only the specific sender or domain when justified. Never release a message with malicious attachment or credential-harvesting link."
+    },
+    {
+      "doc_id": "kb-033",
+      "title": "Email signature setup",
+      "category": "email",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Email signature setup: Use the approved company template and keep name, title, phone, pronouns if allowed, and required legal disclaimer accurate. In Outlook desktop, create it under File > Options > Mail > Signatures. In Outlook on the web, use Settings > Mail > Compose and reply. Avoid large images, tracking pixels, unusual fonts, and personal quotes. If signatures are centrally managed, update the directory profile instead of local settings."
+    },
+    {
+      "doc_id": "kb-034",
+      "title": "Microsoft Teams camera issues",
+      "category": "collaboration",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Teams camera issue: Confirm the camera works in the Windows Camera app or macOS camera preview. In Teams, select Settings > Devices and choose the correct camera. Close Zoom, browsers, or other apps that may be using it. Check OS privacy permissions, reconnect USB cameras, update drivers, and restart Teams. For browser Teams, allow camera permission for the site. Escalate if the camera is missing from Device Manager or fails in all apps."
+    },
+    {
+      "doc_id": "kb-035",
+      "title": "Cannot join Teams meeting",
+      "category": "collaboration",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Cannot join Teams meeting: Check internet connection, calendar link, time zone, and whether the meeting is external. Try Join on the web, restart Teams, sign out/in, and test from another network if possible. If the meeting lobby blocks entry, ask the organizer to admit the user or adjust meeting options. If all meetings fail, clear Teams cache, update Teams, and check Microsoft 365 service health. Capture meeting URL, error text, and timestamp."
+    },
+    {
+      "doc_id": "kb-036",
+      "title": "Teams screen sharing problems",
+      "category": "collaboration",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Teams screen sharing issue: Verify the user is a presenter and that meeting policy allows sharing. On macOS, grant Screen Recording permission under System Settings > Privacy & Security and restart Teams. On Windows, close protected content apps, update graphics drivers, and try sharing a single window instead of the full screen. For remote desktops, confirm redirection policy. Escalate if multiple users in the tenant cannot share."
+    },
+    {
+      "doc_id": "kb-037",
+      "title": "Teams notifications missing",
+      "category": "collaboration",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Teams notifications missing: Check Teams Settings > Notifications, OS Focus Assist/Do Not Disturb, quiet hours, device notification permissions, and whether the conversation is muted. Sign out/in and update Teams. For mobile, confirm battery optimization is not blocking background notifications. If notifications appear on one device but not another, focus on device settings. If no devices receive notifications, check Teams status and user policy."
+    },
+    {
+      "doc_id": "kb-038",
+      "title": "Microsoft Teams cache reset",
+      "category": "collaboration",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Teams cache reset: Use when Teams is slow, shows stale status, fails to load chats, or has persistent sign-in errors after basic troubleshooting. Quit Teams completely from the system tray. On Windows, remove Teams cache folders under the user profile for the affected Teams client, then reopen Teams and sign in. On macOS, quit Teams and clear the Teams cache from Library containers/caches. Do not delete business files; chats and files are stored in Microsoft 365."
+    },
+    {
+      "doc_id": "kb-039",
+      "title": "SharePoint file permissions",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "SharePoint permission request: Capture the site, library, folder or file link, target user, permission needed, duration, and business reason. Prefer granting access through approved groups rather than direct user permissions. Use read-only unless edit is required. Avoid broad sharing links for sensitive data. If access still fails, check unique permissions, link expiration, conditional access, external sharing policy, and whether the user is signed into the correct account."
+    },
+    {
+      "doc_id": "kb-040",
+      "title": "SharePoint site access denied",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "SharePoint Access Denied: Confirm the exact URL, user account, error text, and whether access works in an InPrivate/Incognito window. Check group membership, site permissions, external user invitation status, conditional access, and whether the user is trying a stale or copied link. Clear browser cache if the wrong account is used. Request owner approval before adding access. Escalate if multiple approved members lose access simultaneously."
+    },
+    {
+      "doc_id": "kb-041",
+      "title": "OneDrive and SharePoint file restore",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "File restore: For a deleted OneDrive or SharePoint file, check the Recycle Bin first, then the second-stage recycle bin if available. For unwanted edits, use Version history to restore an earlier version. For widespread deletion or ransomware-like changes, stop syncing, disconnect the device from the network, and contact IT security before restoring. Provide file path, owner, approximate deletion/change time, and whether the file was shared."
+    },
+    {
+      "doc_id": "kb-042",
+      "title": "OneDrive known folder move",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "OneDrive known folder move: Desktop, Documents, and Pictures can be backed up to OneDrive when policy allows. Open OneDrive Settings > Sync and backup > Manage backup, then enable the folders. Resolve blocked items such as unsupported file names, very large files, or files stored in protected system locations. Explain that cloud icons show sync state. Do not move application databases or PST files into OneDrive unless approved."
+    },
+    {
+      "doc_id": "kb-043",
+      "title": "Mapped network drive missing",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Mapped drive missing: Confirm the user is on the office network or VPN. Ask for the drive letter, path, user account, and error. Test the UNC path directly, for example \\\\fileserver\\share. If the path works, remap the drive and select Reconnect at sign-in. If access is denied, check group membership and permissions. If the server is unreachable, test DNS, ping, VPN routes, and service status. Avoid storing passwords in mappings."
+    },
+    {
+      "doc_id": "kb-044",
+      "title": "Network drive access denied",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Network drive access denied: Verify the share path, user identity, department, business reason, and manager or data owner approval. Confirm whether the issue is authentication, share permission, NTFS permission, or file lock. Ask the user to sign out/in after group changes. Do not grant broad access to root folders when a subfolder is enough. Escalate if inherited permissions are broken or sensitive data classification blocks access."
+    },
+    {
+      "doc_id": "kb-045",
+      "title": "Recover deleted local or network files",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Deleted file recovery: For local files, check Recycle Bin, OneDrive backup folders, File History, or endpoint backup if enabled. For network shares, check Previous Versions, snapshot restore, or backup platform. Ask for exact path, file name, owner, deletion time, and last known good version. Do not create many new files on a disk after accidental deletion because it may overwrite recoverable data. Escalate urgent business-critical restores to infrastructure support."
+    },
+    {
+      "doc_id": "kb-046",
+      "title": "Slow Windows computer",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Slow Windows computer: Ask when it started and what changed. Restart first, then check Task Manager for high CPU, memory, disk, or network usage. Confirm free disk space, Windows updates, driver updates, startup apps, malware alerts, VPN impact, and whether the issue occurs for all users or one profile. Run sfc /scannow for suspected system corruption. Escalate if disk health is poor, device overheats, or performance is unusable after cleanup."
+    },
+    {
+      "doc_id": "kb-047",
+      "title": "Windows Update failures",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Windows Update failure: Capture the update KB number, error code, Windows version, and last successful update date. Confirm sufficient disk space and stable power/network. Run Windows Update Troubleshooter, reboot, retry, and check Settings > Windows Update. If still failing, reset update components or use managed update tools according to policy. Escalate if many devices fail the same KB, BitLocker prompts appear, or the device is out of support."
+    },
+    {
+      "doc_id": "kb-048",
+      "title": "Windows activation issue",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Windows activation issue: Ask for the activation error code, edition installed, device ownership, and whether the device is domain/Entra joined. Confirm internet/VPN connectivity and correct system time. Run Settings > System > Activation > Troubleshoot. For enterprise activation, verify license assignment, KMS/AD-based activation reachability, or subscription activation status. Do not use unauthorized product keys. Escalate with slmgr /dlv output when appropriate."
+    },
+    {
+      "doc_id": "kb-049",
+      "title": "Temporary profile or corrupted Windows profile",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Temporary profile issue: Symptoms include missing desktop files, default settings, and a message that Windows signed into a temporary profile. Do not save important files to the temporary desktop. Restart once, check disk space, and confirm the user profile folder exists. If the issue remains, IT should back up user data, inspect profile registry entries, and create a new profile if needed. Escalate before deleting any profile data."
+    },
+    {
+      "doc_id": "kb-050",
+      "title": "Windows sign-in failure",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Windows sign-in failure: Confirm the username format, network connection, keyboard layout, Caps Lock, and whether the password works in webmail or the portal. For domain devices off network, connect to VPN before login if pre-login VPN exists, or use cached credentials. For PIN failures, select Sign-in options and use password. If the account is locked or disabled, follow account unlock procedures. Escalate if the device trust relationship appears broken."
+    },
+    {
+      "doc_id": "kb-051",
+      "title": "BitLocker recovery screen",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "BitLocker recovery screen: Ask for the device name, asset tag, user, recovery key ID shown on screen, and recent changes such as BIOS update, TPM change, docking change, or Windows update. Retrieve the 48-digit recovery key only through approved systems such as Entra ID, Intune, or the documented key escrow. Verify user identity before disclosure. If no key exists, do not guess; escalate because data may be unrecoverable without the key."
+    },
+    {
+      "doc_id": "kb-052",
+      "title": "Drive encryption and recovery key handling",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Drive encryption guidance: Company laptops should remain encrypted to protect data if lost or stolen. Users must not disable BitLocker/FileVault unless IT approves. Recovery keys are sensitive secrets; share them only after identity verification and only through approved channels. Record the key ID, not the full key, in tickets. If a device repeatedly asks for recovery, check TPM health, BIOS settings, Secure Boot, firmware updates, and endpoint management compliance."
+    },
+    {
+      "doc_id": "kb-053",
+      "title": "Windows Safe Mode troubleshooting",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Windows Safe Mode: Use Safe Mode to diagnose startup, driver, malware, or app conflicts. From Windows, hold Shift while selecting Restart, then go to Troubleshoot > Advanced options > Startup Settings > Restart and choose Safe Mode or Safe Mode with Networking. In Safe Mode, uninstall recent drivers/apps, run antivirus or system repair, and check Event Viewer. Do not use Safe Mode for normal work. Escalate if the device cannot reach recovery options."
+    },
+    {
+      "doc_id": "kb-054",
+      "title": "macOS Safe Mode and startup troubleshooting",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "macOS Safe Mode: Use Safe Mode when a Mac is slow, freezing, or failing at startup. For Apple silicon, shut down, hold the power button until startup options appear, select the startup disk, hold Shift, then choose Continue in Safe Mode. For Intel Macs, restart and hold Shift. Safe Mode loads minimal software and performs checks. If the issue disappears, review login items, extensions, updates, and recently installed apps. Escalate boot loops or disk errors."
+    },
+    {
+      "doc_id": "kb-055",
+      "title": "macOS keychain password prompts",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "macOS keychain issue: Repeated prompts may occur after a password change when the login keychain still uses the old password. Ask whether the user recently changed their password. Try signing out/in, updating saved passwords, and opening Keychain Access to unlock or repair the login keychain. If the old password is unknown, a new keychain may be required, which can remove saved Wi-Fi, app, and website passwords. Back up important data first."
+    },
+    {
+      "doc_id": "kb-056",
+      "title": "macOS Wi-Fi troubleshooting",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "macOS Wi-Fi troubleshooting: Toggle Wi-Fi off/on, confirm the correct SSID, forget and rejoin the network, and check whether other devices work. Verify date/time, VPN/proxy settings, and whether a captive portal is required. Run Wireless Diagnostics from the Wi-Fi menu if needed. Remove stale network profiles only when approved for managed devices. Escalate if the Mac cannot see any networks, has hardware errors, or fails only on corporate Wi-Fi."
+    },
+    {
+      "doc_id": "kb-057",
+      "title": "macOS application will not open",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "macOS app will not open: Capture the exact message, app name, version, macOS version, and whether the app is from the company app catalog. Check for updates, restart the Mac, and confirm security permissions under Privacy & Security. If macOS says the app is damaged or cannot be verified, reinstall from an approved source. Do not bypass Gatekeeper for untrusted apps. Escalate if the app is blocked by MDM policy or crashes on launch."
+    },
+    {
+      "doc_id": "kb-058",
+      "title": "Mac printer troubleshooting",
+      "category": "printing",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Mac printer troubleshooting: Confirm printer power, paper, toner, and network reachability. Remove and re-add the printer from System Settings > Printers & Scanners. Use the approved driver or AirPrint if supported. If jobs are stuck, clear the queue and restart the Mac. For corporate print servers, confirm VPN or office network access and user permissions. Escalate with printer name, IP, macOS version, driver used, and error message."
+    },
+    {
+      "doc_id": "kb-059",
+      "title": "Mobile email setup for iOS and Android",
+      "category": "mobile",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Mobile email setup: Use the approved Outlook mobile app or native mail profile if policy allows. Install the app, sign in with corporate email, approve MFA, and complete device compliance steps. Ensure the device has a passcode and is not jailbroken/rooted. If setup fails, update the app, check time/date, confirm license assignment, and remove stale accounts. Do not manually enter server settings unless IT provides them. Escalate conditional access or MDM enrollment errors."
+    },
+    {
+      "doc_id": "kb-060",
+      "title": "Lost phone with company email or MFA",
+      "category": "mobile",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Lost phone response: Report immediately. IT should revoke sessions, remove or reset MFA methods, wipe corporate data through MDM if enrolled, and block mobile mail access if needed. The user should change their password from a trusted device and contact the carrier to suspend the SIM if theft is suspected. Do not approve MFA prompts from a lost device. Document phone number, model, last known location/time, and whether personal data may be affected."
+    },
+    {
+      "doc_id": "kb-061",
+      "title": "Authenticator app moved to a new phone",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "New phone MFA setup: If the old phone is available, add the new authenticator method at https://aka.ms/mfasetup, test it, then remove the old device. If the old phone is unavailable, verify identity through the helpdesk and reset MFA registration according to policy. Encourage adding backup methods such as passkey, security key, or alternate phone if allowed. Treat unexpected MFA reset requests as high risk and require strong verification."
+    },
+    {
+      "doc_id": "kb-062",
+      "title": "VPN connects but internal apps do not work",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "VPN connected but apps fail: Confirm the VPN shows connected and note the assigned VPN IP. Test DNS with nslookup internal hostnames and test routes with ping or tracert to internal resources. Check whether split tunneling, firewall, proxy, or conditional access is blocking traffic. Disconnect/reconnect VPN and restart the app. If only one app fails, troubleshoot that app. If all internal apps fail, escalate with VPN client logs, routes, DNS servers, and timestamps."
+    },
+    {
+      "doc_id": "kb-063",
+      "title": "VPN MFA prompt does not arrive",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "VPN MFA prompt missing: Confirm the password was accepted, phone has internet or cellular service, authenticator app notifications are enabled, and device time is automatic. Open the authenticator app manually to check for pending requests. Try an alternate MFA method if configured. Repeated prompts or denied prompts can indicate attack activity; do not approve unknown requests. If all methods fail, verify identity and reset MFA according to policy."
+    },
+    {
+      "doc_id": "kb-064",
+      "title": "VPN certificate or trust error",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "VPN certificate error: Check device date/time, corporate root certificate installation, VPN server address, and whether a captive portal is intercepting traffic. Do not tell users to ignore certificate warnings or connect to look-alike VPN gateways. Restart the VPN client and test from a trusted network. If the certificate recently changed, confirm with network/security teams. Escalate with exact certificate subject, issuer, error text, screenshot, and VPN client logs."
+    },
+    {
+      "doc_id": "kb-065",
+      "title": "Office Wi-Fi connection",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Office Wi-Fi connection: Use the corporate SSID for company devices and guest SSID for visitors or personal devices. Confirm the device is enrolled and has the required Wi-Fi profile/certificate. Forget and rejoin only if allowed by policy. Check airplane mode, signal strength, and whether other users are affected in the same area. Never share corporate Wi-Fi passwords in public channels. Escalate with SSID, location, device MAC if permitted, time, and error."
+    },
+    {
+      "doc_id": "kb-066",
+      "title": "Guest Wi-Fi and captive portal",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Guest Wi-Fi issue: Connect to the guest SSID, open a browser to a non-sensitive website, and complete the captive portal. If the portal does not load, disable VPN temporarily, forget/rejoin the SSID, clear browser cache, or try http://neverssl.com if policy allows. Guest Wi-Fi should not provide internal network access. For visitors, issue time-limited access according to office policy. Escalate if multiple guests cannot reach the portal."
+    },
+    {
+      "doc_id": "kb-067",
+      "title": "APIPA 169.254.x.x or no DHCP address",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "APIPA address: A 169.254.x.x address usually means the device did not receive a DHCP lease. Check cable/Wi-Fi connection, reboot the device, and run ipconfig /release then ipconfig /renew on Windows. Test another port, cable, or network. If many devices in one area are affected, suspect DHCP scope exhaustion, switch/VLAN issue, or access point failure. Escalate with IP details, MAC address if permitted, location, and switch port."
+    },
+    {
+      "doc_id": "kb-068",
+      "title": "Slow internet or poor network performance",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Slow network: Ask whether the issue affects one app, one device, one location, or everyone. Test wired vs Wi-Fi, VPN vs no VPN, and another website. Check signal strength, bandwidth-heavy apps, cloud sync, updates, and packet loss. Use speed tests only as a rough indicator because corporate filtering and VPN can affect results. Escalate with time, location, SSID, VPN status, IP address, latency, packet loss, and example affected services."
+    },
+    {
+      "doc_id": "kb-069",
+      "title": "Proxy or corporate web filter issues",
+      "category": "network",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Proxy/web filter issue: Capture the URL, category block message, user, device, network, and business reason for access. Confirm the site is work-related and not malicious. Test in another browser and check whether VPN/proxy settings are applied. Do not bypass security filters with personal VPNs or public proxies. Request recategorization or allow-listing through security approval. Escalate urgent false positives that block business-critical systems."
+    },
+    {
+      "doc_id": "kb-070",
+      "title": "Printer offline",
+      "category": "printing",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Printer offline: Confirm the printer is powered on, connected to network/USB, and has no panel errors. In Windows, open Printers & scanners, open the queue, and ensure Use Printer Offline is not selected. Restart the printer and print spooler. For network printers, ping the IP and check whether the IP changed. Re-add using the print server queue when available. Escalate if all users see the printer offline or the device cannot be reached."
+    },
+    {
+      "doc_id": "kb-071",
+      "title": "Print jobs stuck in queue",
+      "category": "printing",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Print jobs stuck: Cancel the stuck job, restart the application, and try a simple test page. Restart the Print Spooler service on Windows or reset the printing system on macOS only when needed. Check for large PDFs, unsupported paper size, secure print hold, offline printer state, or driver mismatch. If one document fails but others print, recreate or print as image/PDF. Escalate if the queue is stuck for multiple users."
+    },
+    {
+      "doc_id": "kb-072",
+      "title": "Scanner not working",
+      "category": "printing",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Scanner issue: Confirm the scanner is powered on, connected, and not showing a hardware error. Test from the vendor scan utility, Windows Scan, or macOS Image Capture. Check whether scanning requires a network folder, email relay, or address book permissions. For scan-to-email failures, verify SMTP relay, recipient address, and attachment size. For scan-to-folder, verify path and service account permissions. Escalate with scanner model, destination, and error."
+    },
+    {
+      "doc_id": "kb-073",
+      "title": "Label or barcode printer issues",
+      "category": "printing",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Label printer issue: Confirm correct label stock, ribbon if used, printer calibration, driver, page size, and application template. Run a printer self-test and recalibrate media sensors. If labels print offset, check margins, darkness, speed, and sensor mode. For barcode readability, verify print quality and scanner compatibility. Do not substitute label sizes without updating templates. Escalate with model, label dimensions, driver, app, and sample output."
+    },
+    {
+      "doc_id": "kb-074",
+      "title": "External monitor not detected",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Monitor not detected: Check power, input source, cable seating, and docking station connection. Press Win+P on Windows and choose Extend or Duplicate. Try a different cable/port and update graphics and dock firmware. On macOS, open Displays settings and hold Option to show Detect Displays if available. Confirm adapter compatibility, especially USB-C alt mode and DisplayLink requirements. Escalate if the monitor works elsewhere but not on the device."
+    },
+    {
+      "doc_id": "kb-075",
+      "title": "Docking station problems",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Docking station issue: Symptoms include monitors, Ethernet, USB, or charging failing through the dock. Disconnect power from the dock for 30 seconds, reconnect, then reseat the laptop. Test direct connections to separate laptop vs dock issues. Install dock firmware, graphics, Thunderbolt/USB-C, and network drivers from approved sources. Confirm the power adapter wattage is correct. Escalate with dock model, laptop model, firmware version, and which ports fail."
+    },
+    {
+      "doc_id": "kb-076",
+      "title": "Laptop battery drains quickly",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Battery drain: Check battery health, cycle count where available, power mode, screen brightness, background apps, high CPU processes, external devices, and whether the drain occurs during sleep. Install firmware and OS updates. For Windows, review Battery usage in Settings; for macOS, review Battery settings and Activity Monitor. Replace the battery or device if health is poor, swelling is observed, or runtime is far below normal after updates and calibration."
+    },
+    {
+      "doc_id": "kb-077",
+      "title": "Laptop not charging",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Laptop not charging: Check outlet, charger, cable, USB-C port, power LED, and whether the charger wattage meets device requirements. Try a known-good charger and inspect for damage. Remove debris carefully without metal tools. Restart the device and install firmware updates if it powers on. If battery is swollen, device is hot, smells unusual, or charger sparks, stop using it and escalate as safety issue. Document charger model, laptop model, and symptoms."
+    },
+    {
+      "doc_id": "kb-078",
+      "title": "Overheating or loud fan",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Overheating or loud fan: Ask when it occurs and whether the device is on a hard surface. Check Task Manager/Activity Monitor for high CPU apps, browser tabs, meetings, indexing, or updates. Ensure vents are clear and ambient temperature is reasonable. Install BIOS/firmware updates and clean dust only using approved methods. If the device shuts down, shows thermal warnings, or battery swelling, stop using it and escalate for hardware inspection."
+    },
+    {
+      "doc_id": "kb-079",
+      "title": "Webcam not detected",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Webcam not detected: Check privacy shutter, function key, USB connection, and whether another app is using the camera. Test in the OS camera app. Confirm camera privacy permissions for Teams, Zoom, browser, or other app. In Device Manager, look for disabled or missing camera devices and update drivers. On macOS, check Privacy & Security > Camera. Escalate if the camera is absent from hardware inventory or fails in all apps after reboot."
+    },
+    {
+      "doc_id": "kb-080",
+      "title": "Microphone not working",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Microphone issue: Confirm the correct input device is selected in OS settings and the app. Check physical mute buttons, headset boom position, browser/app microphone permissions, and input volume. Test with the built-in recorder. For Bluetooth headsets, disconnect/reconnect or test wired audio because some devices switch profiles during calls. Update audio drivers and app. Escalate if no microphone works or the device is missing from sound settings."
+    },
+    {
+      "doc_id": "kb-081",
+      "title": "Bluetooth pairing problems",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Bluetooth pairing issue: Confirm Bluetooth is on, the device is charged, discoverable, and not already paired to another computer or phone. Remove the device from Bluetooth settings and pair again. Restart Bluetooth or reboot the device. Update OS, Bluetooth drivers, and headset firmware if available. Keep the device close and remove interference. Escalate if Bluetooth is missing entirely, disabled by policy, or multiple Bluetooth devices fail."
+    },
+    {
+      "doc_id": "kb-082",
+      "title": "Keyboard or mouse not working",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Keyboard/mouse issue: Check batteries, power switch, USB receiver, cable, Bluetooth pairing, and whether the device works on another computer. For laptop keyboard issues, test external keyboard and check for stuck keys, spills, or accessibility features such as Filter Keys. Restart the computer and test in BIOS or recovery if needed. Do not continue using a device after liquid damage; power it down and escalate for inspection."
+    },
+    {
+      "doc_id": "kb-083",
+      "title": "USB device blocked or not recognized",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "USB issue: Ask what type of device is connected and whether it is approved. Corporate policy may block storage devices, phones, or unknown peripherals. Try another port, check Device Manager, and test a known-good approved device. Do not disable endpoint security or USB control to make a device work. For business need, request an exception with manager and security approval. Escalate unrecognized hardware, driver errors, or repeated connect/disconnect sounds."
+    },
+    {
+      "doc_id": "kb-084",
+      "title": "Application crashes or freezes",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Application crash: Capture app name, version, OS, error text, action being performed, affected file, and whether all users are affected. Restart the app and device, install updates, disable add-ins/plugins, clear app cache, and test with a new file or profile. Check Event Viewer or app logs. If a recent update caused the issue, document the version and consider rollback only through approved change controls. Escalate with logs and reproduction steps."
+    },
+    {
+      "doc_id": "kb-085",
+      "title": "Browser SSO or login loop",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Browser SSO loop: Test in InPrivate/Incognito, then clear cookies/cache for the affected site. Confirm the user is signing in with the corporate account, not a personal account. Check system time, third-party cookie restrictions, blocked pop-ups, browser extensions, conditional access, and VPN requirement. Try another approved browser. If all users see the same loop, check identity provider or app service health. Escalate with URL, correlation ID, and timestamp."
+    },
+    {
+      "doc_id": "kb-086",
+      "title": "Browser pop-ups or unwanted notifications",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Browser pop-ups: Do not click ads or allow notifications from unknown sites. In browser settings, remove suspicious site notification permissions and unwanted extensions. Clear site data for the affected domain and run approved endpoint protection scan. If pop-ups continue outside the browser, treat as potential malware and escalate. Educate users that browser notification prompts can imitate antivirus or helpdesk messages. Never call phone numbers shown in scareware pop-ups."
+    },
+    {
+      "doc_id": "kb-087",
+      "title": "Microsoft Office activation or sign-in issue",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Office activation issue: Confirm the user has the correct Microsoft 365 license and is signed into Office with the corporate account. Open any Office app > Account and check activation status. Sign out/in, update Office, and clear stale work/school account credentials if needed. Verify date/time and network access to Microsoft services. For shared computers, confirm shared computer activation policy. Escalate with error code, Office version, account UPN, and license details."
+    },
+    {
+      "doc_id": "kb-088",
+      "title": "Excel file slow, damaged, or not opening",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Excel file issue: Test whether other workbooks open. Try opening Excel in safe mode, disabling add-ins, opening the file from local disk, and using Open and Repair. Large files with volatile formulas, external links, conditional formatting, or many pivot tables can be slow. If stored in OneDrive/SharePoint, check sync status and version history. Do not delete the original; make a copy before repair. Escalate with file size, location, and sample error."
+    },
+    {
+      "doc_id": "kb-089",
+      "title": "PDF opening, printing, or signature issues",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "PDF issue: Confirm whether the PDF opens in browser, Adobe Acrobat/Reader, or another approved app. Update the PDF app, test another file, and try downloading locally if it is opening from email or SharePoint. For printing, try Print as image. For digital signatures, confirm the certificate is trusted and not expired. Do not bypass signature validation for legal or finance documents. Escalate with PDF sample, app version, and exact error."
+    },
+    {
+      "doc_id": "kb-090",
+      "title": "Software license request",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Software license request: Capture app name, edition, user, device, cost center if required, business reason, duration, and manager approval. Check whether the app is already licensed, has a free approved alternative, or needs security/legal review. Do not install unlicensed or personal software on company devices. For SaaS apps, confirm data handling, SSO, and offboarding requirements. Record license assignment and renewal owner."
+    },
+    {
+      "doc_id": "kb-091",
+      "title": "Company app catalog installation",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "App catalog installation: Ask the user to install approved apps through Company Portal, Software Center, Self Service, or the company app catalog. Confirm the device is online, enrolled, compliant, and has enough disk space. If install is stuck, sync device management policy, restart the device, and retry. Do not download installers from unknown sites. Escalate with app name, device name, install status, error code, and management portal logs."
+    },
+    {
+      "doc_id": "kb-092",
+      "title": "Missing prerequisite or runtime",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Missing prerequisite: Some apps need approved runtimes such as Microsoft Visual C++ Redistributable, .NET Desktop Runtime, Java, WebView2, ODBC drivers, or vendor plugins. Install prerequisites only from the company app catalog or vendor-approved source. Match architecture when relevant, such as x64 vs x86. Avoid unsupported Java or browser plugin versions. Escalate if the app requires end-of-life software or conflicts with security policy."
+    },
+    {
+      "doc_id": "kb-093",
+      "title": "Database or ODBC connection problem",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Database connection issue: Capture app name, database/server, DSN name, error, user, network/VPN status, and whether others are affected. Test DNS and port reachability, confirm credentials are not expired, verify ODBC driver version and bitness, and check whether the user has database permissions. Do not ask for or store database passwords in tickets. Escalate to the app/database owner with timestamp and exact error code."
+    },
+    {
+      "doc_id": "kb-094",
+      "title": "Business app access denied",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Business app access denied: Ask for app name, URL, user, role needed, screenshot, and whether access ever worked. Check SSO login, license assignment, group membership, app-specific role, conditional access, and manager approval. Group membership may not instantly create app roles if the app syncs on a schedule. Avoid granting admin or broad roles to solve a narrow access problem. Escalate to the application owner when role mapping or provisioning fails."
+    },
+    {
+      "doc_id": "kb-095",
+      "title": "Password manager guidance",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Password manager guidance: Use the company-approved password manager for unique, strong passwords and shared team vaults. Do not store corporate passwords in personal browsers, spreadsheets, notes, or chat messages. Shared credentials should have an owner, access review, rotation process, and MFA where possible. If a password may have been exposed, rotate it immediately and review access logs. IT should never ask users to reveal passwords."
+    },
+    {
+      "doc_id": "kb-096",
+      "title": "Sensitive data handling",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Sensitive data handling: Store company data only in approved systems such as SharePoint, OneDrive, file servers, or sanctioned SaaS apps. Do not send sensitive data to personal email, personal cloud storage, public AI tools, or unauthorized vendors. Use encryption and approved sharing links with least privilege. Verify recipients before sending. Report accidental disclosure immediately; early reporting helps contain impact. Follow data classification labels and retention policy."
+    },
+    {
+      "doc_id": "kb-097",
+      "title": "Data loss prevention block",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "DLP block: Capture the app, file name, data type, destination, error text, business reason, and urgency. DLP may block sensitive data such as customer records, payment data, credentials, health data, or confidential documents from leaving approved systems. Do not suggest bypassing controls through screenshots, personal email, or renamed files. If the transfer is legitimate, request an exception or approved secure transfer method through security/compliance."
+    },
+    {
+      "doc_id": "kb-098",
+      "title": "Browser certificate warning",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Certificate warning: Do not proceed past warnings for corporate login, banking, admin consoles, or sensitive sites. Check the URL spelling, date/time, network, VPN/proxy, and whether a captive portal is intercepting traffic. Capture certificate subject, issuer, expiration, and error. If only one device sees the warning, check local trust store and security software. If many users see it, escalate immediately to security/network because it may indicate expired certificate or interception."
+    },
+    {
+      "doc_id": "kb-099",
+      "title": "Safe use of public Wi-Fi",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Public Wi-Fi guidance: Use company VPN when accessing internal resources from hotels, airports, cafes, or conferences. Avoid entering credentials on captive portals that mimic company login pages. Keep file sharing off, use HTTPS, and do not approve unknown certificate warnings. Prefer mobile hotspot for sensitive work if available. Report lost devices or suspicious prompts immediately. Do not connect company devices to unknown USB charging stations unless using a data blocker."
+    },
+    {
+      "doc_id": "kb-100",
+      "title": "Patch and maintenance notification",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Patch guidance: Keep operating system, browser, Office, VPN, security tools, and firmware updated. Users should save work and restart when prompted. Deferring patches may leave the device vulnerable or non-compliant. For long-running business tasks, schedule restart within the allowed deferral window. If an update causes issues, collect update name/KB, time installed, symptoms, and screenshots. Do not disable updates without approved exception."
+    },
+    {
+      "doc_id": "kb-101",
+      "title": "Backup and restore request",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Backup and restore request: Identify the system, data owner, file path, restore point, reason, and urgency. Confirm whether the data is in OneDrive/SharePoint, endpoint backup, file server snapshots, SaaS backup, or database backup. Restore to an alternate location when overwrite risk exists. Get approval before restoring over current production data. For ransomware or mass deletion, involve security before restore to prevent reinfection or loss of evidence."
+    },
+    {
+      "doc_id": "kb-102",
+      "title": "Incorrect system time or time zone",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Time/date issue: Incorrect time can break MFA, certificates, VPN, Kerberos, email, and browser logins. Set time and time zone automatically where policy allows. On domain devices, sync with corporate time sources; off-domain devices can sync with OS time services. Check CMOS/RTC battery for repeated drift after shutdown. For virtual desktops, check host time. Escalate if many devices in one site show the same time drift."
+    },
+    {
+      "doc_id": "kb-103",
+      "title": "No sound or wrong audio output",
+      "category": "hardware",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "No sound: Confirm volume, mute, output device, app-specific output, headset connection, and meeting app settings. Test system sounds and another app. Reconnect USB/Bluetooth audio devices and restart the audio service or device. Check audio enhancements, driver updates, and whether HDMI/monitor audio was selected accidentally. For Bluetooth headsets, set the correct headset profile for calls. Escalate if no audio devices appear or speakers crackle after hardware tests."
+    },
+    {
+      "doc_id": "kb-104",
+      "title": "Poor video conference quality",
+      "category": "collaboration",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Poor meeting quality: Ask whether audio, video, or screen share is affected. Check network strength, VPN, CPU usage, camera resolution, background effects, and other bandwidth-heavy apps. Use wired Ethernet or stronger Wi-Fi, close unused apps, turn off video/background blur, and update Teams/Zoom/browser. If multiple attendees in one office are affected, check network capacity. Escalate with meeting time, organizer, user location, network type, and call health stats."
+    },
+    {
+      "doc_id": "kb-105",
+      "title": "Virtual desktop or VDI issue",
+      "category": "remote",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "VDI issue: Capture the platform, pool/desktop name, user, device, network, error, and whether the issue occurs before or after login. Try reconnecting, restarting the virtual desktop if allowed, and testing from another network. Check MFA, client version, display scaling, local device redirection, and profile/container errors. Do not reset persistent desktops without confirming data impact. Escalate with broker logs, session ID, timestamp, and affected pool."
+    },
+    {
+      "doc_id": "kb-106",
+      "title": "Single sign-on SAML/OIDC error",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "SSO error: Capture the app URL, user, error, correlation/request ID, timestamp, and whether other users are affected. Test in a private window and confirm the user is assigned to the app. Common causes include missing group assignment, expired certificate, wrong redirect URI, bad claim mapping, clock skew, conditional access, or vendor outage. Do not change SSO settings without change control. Escalate to identity/app admins with correlation details."
+    },
+    {
+      "doc_id": "kb-107",
+      "title": "MFA lost phone and recovery",
+      "category": "access",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Lost MFA device: Verify identity using approved recovery steps before changing MFA. Temporarily require password reset if compromise is possible, remove the lost device from authentication methods, revoke sessions, and register a new method. Encourage backup methods such as security key, passkey, or alternate phone if policy allows. Do not accept email-only requests for MFA reset on high-risk or privileged accounts. Escalate suspicious or urgent executive requests to security."
+    },
+    {
+      "doc_id": "kb-108",
+      "title": "Privileged access request",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Privileged access: Requests for admin roles, production access, firewall changes, database admin, or security tools require business justification, manager/data owner approval, least privilege, MFA, logging, and time-bound access. Use privileged identity management where available. Do not grant standing admin access for convenience. Confirm training or policy requirements. Record approver, role, scope, start/end time, and ticket link. Remove access promptly after completion."
+    },
+    {
+      "doc_id": "kb-109",
+      "title": "Possible service outage",
+      "category": "operations",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Service outage triage: Determine scope: one user, one device, one site, one app, or everyone. Check service status pages, monitoring, recent changes, network/VPN, identity provider, and vendor advisories. Ask for exact error, timestamp, location, and business impact. Provide a concise workaround if available and avoid repeated troubleshooting when a confirmed outage exists. Escalate to incident management when many users or critical services are affected."
+    },
+    {
+      "doc_id": "kb-110",
+      "title": "Ticket priority guidelines",
+      "category": "operations",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Ticket priority: P1 is critical business outage, security incident, or many users blocked. P2 is major degradation or a key user/team unable to work with no workaround. P3 is individual user issue with workaround or normal access request. P4 is low-impact request, how-to, or scheduled change. Set priority based on impact and urgency, not requester title alone. Reassess priority if scope changes. Record business impact and workaround in the ticket."
+    },
+    {
+      "doc_id": "kb-111",
+      "title": "Information gathering template",
+      "category": "operations",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Minimum troubleshooting details: user, device name, location, contact method, app/service, exact error text, screenshot, steps to reproduce, when it started, recent changes, network/VPN status, whether others are affected, and business impact. For intermittent issues, collect timestamps and frequency. For access requests, collect approval and role needed. Good intake reduces back-and-forth and helps escalation teams act quickly."
+    },
+    {
+      "doc_id": "kb-112",
+      "title": "Escalation to engineering or vendor",
+      "category": "operations",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Escalation checklist: Include summary, impact, affected users, environment, exact error, screenshots, logs, timestamps with time zone, troubleshooting already performed, recent changes, reproduction steps, workaround, and requested action. Remove passwords, secrets, and unnecessary personal data from logs before sharing externally. For vendors, include contract/support ID if available. Keep the user updated with status and next meaningful action."
+    },
+    {
+      "doc_id": "kb-113",
+      "title": "User scam and social engineering warning",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Social engineering warning: IT will not ask for passwords, MFA codes, gift cards, cryptocurrency, remote access to personal devices, or approval of unexpected MFA prompts. Be cautious of urgent requests, secret instructions, changed bank details, executive impersonation, and helpdesk impersonation. Verify unusual requests through a known trusted channel. Report suspicious calls, chats, emails, and texts to security, even if no action was taken."
+    },
+    {
+      "doc_id": "kb-114",
+      "title": "Data retention and legal hold",
+      "category": "compliance",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Retention/legal hold: Do not delete, purge, or alter mailboxes, files, chat records, or backups that may be under retention, investigation, or legal hold. Requests to recover, export, or delete regulated data require appropriate approval from legal, compliance, or the data owner. If a user asks for permanent deletion, confirm policy first. Escalate any uncertainty; accidental deletion of held data can create compliance risk."
+    },
+    {
+      "doc_id": "kb-115",
+      "title": "Cloud storage quota exceeded",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Cloud storage quota exceeded: Check OneDrive, SharePoint, mailbox, or SaaS storage usage depending on the warning. Identify large files, version history, Recycle Bin, Teams meeting recordings, and duplicate backups. Move data only to approved storage, not personal cloud accounts. Use retention-aware cleanup; do not delete records that must be kept. If storage growth is business-required, request quota increase or archive solution with owner approval."
+    },
+    {
+      "doc_id": "kb-116",
+      "title": "Invalid file name or path too long",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Invalid file name/path: Sync and file operations can fail when names contain unsupported characters, reserved names, trailing spaces, very deep folders, or paths exceed platform limits. Shorten folder names, remove unsupported characters, and avoid symbols that apps reserve. Rename in small batches to prevent broken links. For shared libraries, coordinate with owners before major renames. Escalate if automated migration or bulk remediation is needed."
+    },
+    {
+      "doc_id": "kb-117",
+      "title": "Large file upload or download issue",
+      "category": "storage",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Large file transfer issue: Confirm file size, file type, destination, browser/app, network, VPN, and available storage. Use OneDrive/SharePoint sync client or approved transfer tools for large files rather than email attachments. Keep the device awake and on stable network. Compress only when appropriate and do not split sensitive data into unmanaged locations. Check service limits and tenant policy. Escalate repeated failures with upload logs and exact error."
+    },
+    {
+      "doc_id": "kb-118",
+      "title": "Device enrollment or Company Portal issue",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Device enrollment issue: Capture device name, serial number, OS version, user, ownership type, and error. Confirm the user is licensed, device is supported, internet is stable, date/time are correct, and no previous management profile conflicts. For Windows, check Company Portal or Access work or school. For macOS/iOS/Android, check management profile status. Do not enroll personal devices unless BYOD policy allows. Escalate with MDM error code."
+    },
+    {
+      "doc_id": "kb-119",
+      "title": "Device compliance failure",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Device compliance failure: Common causes include missing encryption, outdated OS, disabled firewall, inactive antivirus, no passcode, jailbreak/root detection, stale check-in, or missing security update. Ask the user to open Company Portal and view the compliance reason. Remediate the listed issue, sync the device, and wait for policy refresh. Do not bypass conditional access. Escalate if the device reports compliant locally but access remains blocked."
+    },
+    {
+      "doc_id": "kb-120",
+      "title": "Endpoint antivirus or EDR alert",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Endpoint security alert: Capture device, user, alert name, severity, file path, process, time, and current device status. Do not restore quarantined files or allow-list detections without security approval. If alert indicates active compromise, isolate the device from the network and escalate to security. Ask the user what they were doing before the alert and whether they clicked links or installed software. Preserve logs and avoid unnecessary reboot if forensics is needed."
+    },
+    {
+      "doc_id": "kb-121",
+      "title": "Local admin password and LAPS handling",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Local admin password handling: Local administrator passwords are sensitive and should be retrieved only from approved password management such as LAPS or privileged access tooling. Verify requester authorization and business need. Do not paste passwords into tickets, chat, or email. Prefer remote assistance or temporary elevation over revealing the password. Rotate or expire the password after use when policy requires. Record who accessed it, device, time, and purpose."
+    },
+    {
+      "doc_id": "kb-122",
+      "title": "Remote lock or wipe request",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Remote lock/wipe request: Use for lost, stolen, retired, or compromised devices. Verify the asset, user, ownership type, and approval before wiping. For BYOD, use selective wipe of corporate data when possible; for company-owned devices, full wipe may be appropriate. Confirm backups or data location before wiping if the device is not compromised. Record wipe command time, device response, and final state. Involve security for theft or suspected compromise."
+    },
+    {
+      "doc_id": "kb-123",
+      "title": "Application is slow",
+      "category": "software",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Slow application: Determine whether slowness is for one user, one location, one dataset, or everyone. Check app status page, network/VPN, browser cache, device CPU/memory, database/API dependencies, and recent changes. Test with another account or device when appropriate. Avoid reinstalling before checking if the service itself is degraded. Escalate with transaction ID, timestamps, sample records, screenshots, and performance measurements."
+    },
+    {
+      "doc_id": "kb-124",
+      "title": "Browser extension management",
+      "category": "security",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Browser extensions: Install only approved extensions from trusted stores or company policy. Remove unknown extensions, especially those requesting access to all sites, passwords, browsing data, or clipboard. Suspicious extensions can steal tokens and inject ads. If a required extension breaks a site, disable temporarily for testing and report to IT. Do not install VPN, coupon, password, AI, or screen capture extensions without approval. Escalate malicious extension findings to security."
+    },
+    {
+      "doc_id": "kb-125",
+      "title": "Password security best practices",
+      "category": "password",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Password best practices: Use unique passwords or passphrases for every account, store them in the approved password manager, and enable MFA where available. Never share passwords with coworkers, managers, vendors, or IT. Do not reuse personal passwords for work. Change the password immediately if it may have been exposed, used on a phishing site, or shared accidentally. Prefer passkeys or security keys where company policy supports them."
+    },
+    {
+      "doc_id": "kb-126",
+      "title": "Personal device and BYOD support",
+      "category": "mobile",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "BYOD support: Personal devices may access company resources only if policy allows and required management/security controls are accepted. Explain what data IT can and cannot see or wipe. Support is usually limited to enrollment, email, MFA, and approved apps, not personal app repair or hardware issues. Do not store company files in unmanaged personal apps. For privacy concerns, direct users to the BYOD policy and offer company-owned device options when available."
+    },
+    {
+      "doc_id": "kb-127",
+      "title": "Travel IT checklist",
+      "category": "remote",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Travel checklist: Before travel, confirm laptop updates, VPN, MFA backup method, charger/adapter, offline access to needed files, and local support contacts. Avoid public computers for corporate login. Use company VPN on untrusted networks and keep devices with you or secured. Do not pack laptops in checked luggage if avoidable. For international travel, check roaming, export/security restrictions, and whether a loaner travel device is required for high-risk destinations."
+    },
+    {
+      "doc_id": "kb-128",
+      "title": "International roaming and MFA while traveling",
+      "category": "mobile",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Travel MFA/roaming: Before leaving, add backup MFA methods that work without SMS where possible, such as authenticator app number matching, passkey, or security key. Confirm the phone has roaming or Wi-Fi access and the authenticator app works offline for codes if supported. Avoid relying only on a phone number that may not receive texts abroad. Report lost devices immediately. For high-risk travel, ask security whether special access controls apply."
+    },
+    {
+      "doc_id": "kb-129",
+      "title": "Accessibility and assistive technology support",
+      "category": "endpoint",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Accessibility support: Help users configure built-in tools such as captions, screen reader, magnifier, high contrast, voice typing, dictation, sticky keys, keyboard navigation, and display scaling. For assistive software or hardware, collect business need, device, app compatibility, and approval requirements. Treat accommodation details as sensitive. Do not remove accessibility settings during troubleshooting without consent. Escalate procurement or compatibility issues to HR/IT leadership as policy requires."
+    },
+    {
+      "doc_id": "kb-130",
+      "title": "Self-service password reset failure",
+      "category": "password",
+      "source": "internal-kb",
+      "version": "2026-05-07",
+      "body": "Self-service password reset failure: Ask for the exact error, account email, method used, whether MFA/recovery methods are available, and whether the account is locked or disabled. Confirm the user is at the correct reset portal and not using an old link. Links may expire; request a new link when needed. If recovery information is outdated, verify identity before changing methods. Escalate if many users cannot access the reset service or emails are not delivered."
     }
   ]
 }

@@ -154,6 +154,19 @@ class ItOpsClient:
             logger.warning("ops-api unreachable for priority update: %s", exc)
             return None
 
+    def delete_ticket(self, ticket_id: str) -> bool:
+        """Delete a ticket. Returns True on success, False if not found or ops unreachable."""
+        try:
+            self._request("DELETE", f"/api/v1/tickets/{ticket_id}")
+            return True
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 404:
+                return False
+            raise
+        except httpx.RequestError as exc:
+            logger.warning("ops-api unreachable for delete_ticket: %s", exc)
+            return False
+
     def analyze_logs(self, service: str = "network_events") -> dict:
         """Best-effort log analysis — returns the dict the ops API produces, or
         a minimal placeholder if unreachable."""

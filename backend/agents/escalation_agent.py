@@ -9,21 +9,12 @@ logger = get_logger(__name__)
 
 
 def _should_escalate(state: dict) -> bool:
-    if state.get("match_strength") in {"weak", "none"} and state.get(
-        "is_support_request", True
-    ):
-        return True
-    if state.get("severity") == "critical":
-        return True
-    if state.get("urgency") == "high":
-        return True
+    # Automation explicitly failed or requires manual intervention.
     if state.get("automation_status") in {"failed", "manual_required"}:
         return True
-    if float(state.get("confidence") or 0.0) < 0.55 and state.get(
-        "is_support_request", True
-    ):
-        return True
-    return False
+    # Routing reached here because the user confirmed our suggestion didn't help.
+    # Any other path to this node is intentional escalation.
+    return True
 
 
 class EscalationAgent:

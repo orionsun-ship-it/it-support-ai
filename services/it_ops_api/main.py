@@ -35,7 +35,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=_ALLOWED,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "PATCH"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Content-Type", "X-Internal-Token"],
 )
 
@@ -238,6 +238,27 @@ def update_priority(
     session.commit()
     session.refresh(ticket)
     return ticket.model_dump(mode="json")
+
+
+@app.delete(
+    "/api/v1/tickets/{ticket_id}",
+    dependencies=[Depends(require_service_token)],
+)
+def delete_ticket(ticket_id: str, session: Session = Depends(get_session)) -> dict:
+    ticket = session.get(Ticket, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail=f"Ticket {ticket_id} not found")
+    session.add(
+        AuditLog(
+            actor="agent",
+            action="tickets.delete",
+            target=ticket.ticket_id,
+            detail=f"status={ticket.status}",
+        )
+    )
+    session.delete(ticket)
+    session.commit()
+    return {"deleted": True, "ticket_id": ticket_id}
 
 
 @app.get(

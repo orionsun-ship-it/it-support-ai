@@ -5,6 +5,23 @@ Three responsibilities:
 1. Decide whether a safe automation is allowed and execute it (intent-based).
 2. Decide whether a ticket is required (gated, not blanket).
 3. Append concise outcome text without overwriting the knowledge response.
+
+Automation honesty
+------------------
+Most automations in this capstone are *simulated* — they return a canned
+"success" message without actually triggering an enterprise IT system. They
+are tagged with ``simulated=True`` and the response text is prefixed
+``[Simulated]`` so graders, demo viewers, and end users can tell what would
+hit a production system in a real deployment versus what is a stub.
+
+Two intents do exercise real subsystems even though they are limited in
+scope:
+
+- ``vpn_log_check`` — calls the IT Ops API ``analyze_logs`` endpoint, which
+  reads from sample log files on disk.
+- ``status_check`` — queries the real ticket database for the session.
+
+Those are tagged ``simulated=False``.
 """
 
 from __future__ import annotations
@@ -15,6 +32,12 @@ from backend.services.it_ops_client import ItOpsClient
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+SIMULATED_PREFIX = "[Simulated]"
+
+# Intents whose automation paths exercise a real subsystem (the ops API or the
+# ticket DB). Everything else is a canned, simulated success.
+REAL_AUTOMATION_INTENTS = {"vpn_log_check", "status_check"}
 
 ESCALATION_KEYWORDS = re.compile(
     r"\b(urgent|critical|emergency|asap|immediately|cannot work|can't work|outage|"
@@ -90,31 +113,36 @@ class WorkflowAgent:
         if intent == "password_reset":
             return (
                 "success",
-                "Password reset eligibility verified. A reset link has been "
-                "sent to the registered email.",
+                f"{SIMULATED_PREFIX} Password reset eligibility verified. A reset "
+                "link would be sent to the registered email by the identity "
+                "provider in a production deployment.",
             )
         if intent == "account_unlock":
             return (
                 "success",
-                "Account unlock request submitted. The account should unlock "
-                "within 2 minutes.",
+                f"{SIMULATED_PREFIX} Account unlock request submitted. In a "
+                "production deployment the directory service would unlock the "
+                "account within ~2 minutes.",
             )
         if intent == "software_license_check":
             return (
                 "success",
-                "Software license check completed. The assigned license is active.",
+                f"{SIMULATED_PREFIX} Software license check completed against "
+                "the asset-management stub. The assigned license appears active.",
             )
         if intent == "software_install":
             return (
                 "success",
-                "Software install request submitted to the package portal. "
-                "Approval typically completes within one business hour.",
+                f"{SIMULATED_PREFIX} Software install request submitted to the "
+                "package portal stub. Approval would typically complete within "
+                "one business hour.",
             )
         if intent == "access_request":
             return (
                 "success",
-                "Access request submitted to the access management team for "
-                "review. You'll receive an email once it's approved.",
+                f"{SIMULATED_PREFIX} Access request submitted to the access "
+                "management stub. You would receive an email once the request "
+                "is approved.",
             )
         if intent == "vpn_log_check":
             try:
@@ -155,11 +183,15 @@ class WorkflowAgent:
         state.setdefault("route_trace", []).append("workflow")
         state["automation_status"] = "not_needed"
         state["automation_result"] = None
+        state["automation_simulated"] = False
 
         if state.get("requires_automation") and state.get("intent") in AUTOMATABLE_INTENTS:
             status, message = self._run_automation(state)
             state["automation_status"] = status
             state["automation_result"] = message or None
+            state["automation_simulated"] = (
+                state.get("intent") not in REAL_AUTOMATION_INTENTS
+            )
 
         create_ticket, reason = _should_create_ticket(state)
         state["should_create_ticket"] = create_ticket

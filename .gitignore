@@ -40,3 +40,6 @@ frontend/dist/
 !services/it_ops_api/sample_logs/*.log
 tests/results/
 !tests/results/.gitkeep
+
+# Throwaway DB used by the MCP cross-transport proof harness.
+tests/results/mcp_proof.db

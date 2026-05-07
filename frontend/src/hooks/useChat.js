@@ -13,12 +13,14 @@ function uuid() {
 
 /**
  * Each message: { id, role, content, agentName, ticketId, escalated,
- *                 matchStrength, sources, feedback, timestamp }
+ *                 matchStrength, sources, routeTrace, finalRoute,
+ *                 ticketDecisionReason, automationStatus, automationSimulated,
+ *                 category, intent, severity, urgency, feedback, timestamp }
  *
  * `feedback` is the locally-tracked sentiment ("up" | "down" | null).
- * The /chat response carries more diagnostic fields (route_trace, intent,
- * etc.) that are useful for grading / curl introspection but not displayed
- * in the UI.
+ * The diagnostic fields (routeTrace, ticketDecisionReason, automationStatus,
+ * etc.) are surfaced in the UI on each assistant turn so a grader can see
+ * exactly which agents fired and why a ticket / escalation was opened.
  */
 export default function useChat(sessionId) {
   const [messages, setMessages] = useState([]);
@@ -64,6 +66,15 @@ export default function useChat(sessionId) {
             escalated: Boolean(data.escalated),
             matchStrength: data.match_strength ?? null,
             sources: Array.isArray(data.sources) ? data.sources : [],
+            routeTrace: Array.isArray(data.route_trace) ? data.route_trace : [],
+            finalRoute: data.final_route ?? null,
+            ticketDecisionReason: data.ticket_decision_reason ?? null,
+            automationStatus: data.automation_status ?? null,
+            automationSimulated: Boolean(data.automation_simulated),
+            category: data.category ?? null,
+            intent: data.intent ?? null,
+            severity: data.severity ?? null,
+            urgency: data.urgency ?? null,
             feedback: null,
             timestamp: new Date().toISOString(),
           },

@@ -8,6 +8,7 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(false);
   const [openId, setOpenId] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const refresh = async () => {
     setLoading(true);
@@ -21,6 +22,20 @@ export default function TicketsPage() {
       setError(err.message || String(err));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteTicket = async (ticketId) => {
+    setDeletingId(ticketId);
+    try {
+      const resp = await fetch(`/api/tickets/${ticketId}`, { method: "DELETE" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      setTickets((prev) => prev.filter((t) => t.ticket_id !== ticketId));
+      if (openId === ticketId) setOpenId(null);
+    } catch (err) {
+      setError(`Delete failed: ${err.message || String(err)}`);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -186,7 +201,9 @@ export default function TicketsPage() {
                             <DetailPanel
                               ticket={t}
                               updating={updatingId === t.ticket_id}
+                              deleting={deletingId === t.ticket_id}
                               onUpdateStatus={(s) => updateStatus(t.ticket_id, s)}
+                              onDelete={() => deleteTicket(t.ticket_id)}
                             />
                           </td>
                         </tr>
@@ -203,7 +220,7 @@ export default function TicketsPage() {
   );
 }
 
-function DetailPanel({ ticket, updating, onUpdateStatus }) {
+function DetailPanel({ ticket, updating, deleting, onUpdateStatus, onDelete }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <div
@@ -287,6 +304,34 @@ function DetailPanel({ ticket, updating, onUpdateStatus }) {
         {updating && (
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>updating…</span>
         )}
+      </div>
+
+      <div style={{ marginTop: 8, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
+        <button
+          disabled={deleting || updating}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (window.confirm(`Delete ticket ${ticket.ticket_id}? This cannot be undone.`)) {
+              onDelete();
+            }
+          }}
+          style={{
+            padding: "6px 12px",
+            fontSize: 12,
+            fontWeight: 500,
+            borderRadius: 6,
+            cursor: deleting || updating ? "not-allowed" : "pointer",
+            border: "1px solid #fca5a5",
+            background: "var(--red-soft)",
+            color: "#991b1b",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <TrashIcon />
+          {deleting ? "Deleting…" : "Delete ticket"}
+        </button>
       </div>
     </div>
   );
@@ -532,6 +577,20 @@ function DotInline({ color }) {
         display: "inline-block",
       }}
     />
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

@@ -21,6 +21,14 @@ fi
 # shellcheck disable=SC1091
 source .venv/bin/activate
 
+# This project pins Python 3.11. Warn (but don't fail) if a different version
+# is in the venv so the user knows things may not be reproducible.
+PY_VER="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+if [ "$PY_VER" != "3.11" ]; then
+  echo "[dev.sh] WARNING: venv is on Python $PY_VER but this project pins 3.11."
+  echo "[dev.sh]          Recreate with: rm -rf .venv && make setup"
+fi
+
 PIDS=()
 cleanup() {
   echo

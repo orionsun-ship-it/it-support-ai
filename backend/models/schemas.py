@@ -76,6 +76,7 @@ class AgentResponse(BaseModel):
     final_route: Optional[str] = None
     ticket_decision_reason: Optional[str] = None
     automation_status: Optional[str] = None
+    automation_simulated: bool = False
 
 
 class TicketCreate(BaseModel):

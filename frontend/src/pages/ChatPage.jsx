@@ -303,14 +303,15 @@ function AssistantBubble({ message, onFeedback }) {
           fontSize: 14,
           lineHeight: 1.6,
           color: "var(--text)",
-          whiteSpace: "pre-wrap",
           boxShadow: "var(--shadow-xs)",
         }}
       >
-        {message.content}
+        <MarkdownContent content={message.content} />
       </div>
 
       {message.sources && message.sources.length > 0 && <Sources sources={message.sources} />}
+
+      <RouteTraceStrip message={message} />
 
       <div
         style={{
@@ -331,6 +332,11 @@ function AssistantBubble({ message, onFeedback }) {
             <DotIcon /> Escalated
           </Chip>
         )}
+        {message.automationSimulated && (
+          <Chip kind="neutral">
+            <DotIcon /> Simulated automation
+          </Chip>
+        )}
         {message.agentName !== "error" && onFeedback && (
           <FeedbackButtons
             messageId={message.id}
@@ -340,6 +346,164 @@ function AssistantBubble({ message, onFeedback }) {
         )}
       </div>
     </div>
+  );
+}
+
+function RouteTraceStrip({ message }) {
+  const trace = Array.isArray(message.routeTrace) ? message.routeTrace : [];
+  if (trace.length === 0) return null;
+
+  const ticketReason = message.ticketDecisionReason;
+  const automationStatus = message.automationStatus;
+
+  return (
+    <details
+      style={{
+        maxWidth: "84%",
+        background: "var(--surface-soft)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+        padding: "8px 12px",
+        fontSize: 11.5,
+        color: "var(--text-secondary)",
+      }}
+    >
+      <summary
+        style={{
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          color: "var(--text-muted)",
+          fontWeight: 500,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10.5,
+            fontWeight: 600,
+            letterSpacing: 0.6,
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+          }}
+        >
+          Route trace
+        </span>
+        <RouteTraceInline trace={trace} />
+      </summary>
+      <div
+        style={{
+          marginTop: 8,
+          display: "grid",
+          gridTemplateColumns: "auto 1fr",
+          rowGap: 4,
+          columnGap: 12,
+          fontSize: 11.5,
+        }}
+      >
+        <DiagLabel>nodes</DiagLabel>
+        <RouteTraceInline trace={trace} expanded />
+        {message.category && (
+          <>
+            <DiagLabel>category</DiagLabel>
+            <DiagValue>{message.category}</DiagValue>
+          </>
+        )}
+        {message.intent && (
+          <>
+            <DiagLabel>intent</DiagLabel>
+            <DiagValue>{message.intent}</DiagValue>
+          </>
+        )}
+        {message.severity && (
+          <>
+            <DiagLabel>severity</DiagLabel>
+            <DiagValue>{message.severity}</DiagValue>
+          </>
+        )}
+        {message.urgency && (
+          <>
+            <DiagLabel>urgency</DiagLabel>
+            <DiagValue>{message.urgency}</DiagValue>
+          </>
+        )}
+        {ticketReason && (
+          <>
+            <DiagLabel>ticket</DiagLabel>
+            <DiagValue>{ticketReason}</DiagValue>
+          </>
+        )}
+        {automationStatus && (
+          <>
+            <DiagLabel>automation</DiagLabel>
+            <DiagValue>
+              {automationStatus}
+              {message.automationSimulated ? " · simulated" : ""}
+            </DiagValue>
+          </>
+        )}
+      </div>
+    </details>
+  );
+}
+
+function RouteTraceInline({ trace, expanded = false }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        flexWrap: "wrap",
+        gap: 4,
+        alignItems: "center",
+        fontFamily: "var(--font-mono, monospace)",
+      }}
+    >
+      {trace.map((node, idx) => (
+        <span key={idx} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <span
+            className="mono"
+            style={{
+              fontSize: 11,
+              padding: "1px 6px",
+              borderRadius: 4,
+              background: expanded ? "var(--surface)" : "#eef2f7",
+              color: "var(--text-secondary)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            {node}
+          </span>
+          {idx < trace.length - 1 && (
+            <span style={{ color: "var(--text-faint)", fontSize: 11 }}>→</span>
+          )}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function DiagLabel({ children }) {
+  return (
+    <span
+      style={{
+        color: "var(--text-muted)",
+        fontSize: 10.5,
+        fontWeight: 600,
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function DiagValue({ children }) {
+  return (
+    <span className="mono" style={{ fontSize: 11.5, color: "var(--text)" }}>
+      {children}
+    </span>
   );
 }
 
@@ -465,6 +629,113 @@ function Sources({ sources }) {
           <span style={{ flex: 1, color: "var(--text-secondary)" }}>{s.title}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ---------- markdown renderer (no external deps) ----------
+
+function inlineMarkdown(text, key = 0) {
+  const segments = [];
+  const re = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
+  let last = 0;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) segments.push(text.slice(last, m.index));
+    if (m[2] !== undefined)
+      segments.push(<strong key={m.index}>{m[2]}</strong>);
+    else if (m[3] !== undefined)
+      segments.push(<em key={m.index}>{m[3]}</em>);
+    else if (m[4] !== undefined)
+      segments.push(
+        <code
+          key={m.index}
+          style={{
+            background: "var(--surface-soft)",
+            border: "1px solid var(--border)",
+            borderRadius: 4,
+            padding: "1px 5px",
+            fontSize: "0.88em",
+            fontFamily: "monospace",
+          }}
+        >
+          {m[4]}
+        </code>
+      );
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) segments.push(text.slice(last));
+  return segments.length === 0
+    ? ""
+    : segments.length === 1 && typeof segments[0] === "string"
+    ? segments[0]
+    : <span key={key}>{segments}</span>;
+}
+
+function MarkdownContent({ content }) {
+  const lines = (content || "").split("\n");
+  const nodes = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const raw = lines[i];
+    const stripped = raw.trimStart();
+
+    if (/^#{1,3}\s/.test(stripped)) {
+      const level = stripped.match(/^(#{1,3})/)[1].length;
+      const text = stripped.replace(/^#{1,3}\s+/, "");
+      nodes.push(
+        <div
+          key={i}
+          style={{
+            fontWeight: 600,
+            fontSize: level === 1 ? 16 : level === 2 ? 15 : 14,
+            marginTop: nodes.length ? 10 : 0,
+            marginBottom: 2,
+            color: "var(--text)",
+          }}
+        >
+          {inlineMarkdown(text, i)}
+        </div>
+      );
+    } else if (/^[-*•]\s/.test(stripped)) {
+      nodes.push(
+        <div key={i} style={{ display: "flex", gap: 8, paddingLeft: 8 }}>
+          <span style={{ color: "var(--text-muted)", flexShrink: 0, marginTop: 1 }}>•</span>
+          <span>{inlineMarkdown(stripped.replace(/^[-*•]\s+/, ""), i)}</span>
+        </div>
+      );
+    } else if (/^\d+\.\s/.test(stripped)) {
+      const num = stripped.match(/^(\d+)\./)[1];
+      nodes.push(
+        <div key={i} style={{ display: "flex", gap: 8, paddingLeft: 8 }}>
+          <span
+            style={{
+              color: "var(--text-muted)",
+              flexShrink: 0,
+              minWidth: 18,
+              textAlign: "right",
+              marginTop: 1,
+            }}
+          >
+            {num}.
+          </span>
+          <span>{inlineMarkdown(stripped.replace(/^\d+\.\s+/, ""), i)}</span>
+        </div>
+      );
+    } else if (stripped === "") {
+      if (nodes.length && nodes[nodes.length - 1]?.key !== `gap-${i - 1}`) {
+        nodes.push(<div key={`gap-${i}`} style={{ height: 6 }} />);
+      }
+    } else {
+      nodes.push(<div key={i}>{inlineMarkdown(raw, i)}</div>);
+    }
+    i++;
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {nodes}
     </div>
   );
 }

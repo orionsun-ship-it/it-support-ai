@@ -1,9 +1,14 @@
-.PHONY: help setup setup-dev dev backend ops mcp frontend ingest test format lint clean
+.PHONY: help setup setup-dev dev backend ops mcp frontend ingest test test-llm test-mcp format lint clean
+
+# This project standardises on Python 3.11. The Makefile prefers `python3.11`
+# explicitly; override with `make setup PYTHON=python3` if you only have one
+# Python on PATH and have verified it's 3.11.
+PYTHON ?= python3.11
 
 help:
-	@echo "IT Support AI — common commands"
+	@echo "IT Support AI — common commands  (Python $(shell $(PYTHON) --version 2>/dev/null || echo '?'))"
 	@echo ""
-	@echo "  make setup       Create venv, install Python + npm deps, copy .env"
+	@echo "  make setup       Create venv (Python 3.11), install Python + npm deps, copy .env"
 	@echo "  make setup-dev   Also install dev tools (black, ruff, pytest, prettier)"
 	@echo "  make dev         Start ops API (8001), backend (8000), frontend (5173)"
 	@echo "  make ops         Run only the IT Ops API on :8001"
@@ -11,13 +16,21 @@ help:
 	@echo "  make mcp         Run the real MCP server over stdio (for VS Code/Claude Desktop)"
 	@echo "  make frontend    Run only the frontend on :5173"
 	@echo "  make ingest      Re-run the KB ingestion pipeline"
-	@echo "  make test        Run the accuracy harness"
+	@echo "  make test        Run the deterministic routing harness (no LLM calls)"
+	@echo "  make test-llm    Run the live-LLM accuracy harness (calls Claude, costs API spend)"
+	@echo "  make test-mcp    Run the MCP cross-transport proof test"
 	@echo "  make format      Run black + prettier"
 	@echo "  make lint        Run ruff"
 	@echo "  make clean       Remove venv, node_modules, chroma_db, SQLite db"
 
 setup:
-	@if [ ! -d .venv ]; then python3 -m venv .venv; fi
+	@command -v $(PYTHON) >/dev/null 2>&1 || { \
+		echo "[setup] ERROR: $(PYTHON) not found on PATH."; \
+		echo "[setup] This project pins Python 3.11. Install it (pyenv install 3.11, brew install python@3.11, or similar) and re-run."; \
+		echo "[setup] If you've already verified your default python3 is 3.11, you can override with: make setup PYTHON=python3"; \
+		exit 1; \
+	}
+	@if [ ! -d .venv ]; then $(PYTHON) -m venv .venv; fi
 	. .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
 	cd frontend && npm install
 	@if [ ! -f .env ]; then cp .env.example .env; echo "[setup] Created .env — edit and set ANTHROPIC_API_KEY"; fi
@@ -47,7 +60,13 @@ ingest:
 	. .venv/bin/activate && python -m backend.rag.ingest
 
 test:
+	. .venv/bin/activate && python tests/test_routing.py
+
+test-llm:
 	. .venv/bin/activate && python tests/test_accuracy.py
+
+test-mcp:
+	. .venv/bin/activate && python tests/test_mcp_proof.py
 
 format:
 	. .venv/bin/activate && black backend mcp_server services tests
