@@ -163,7 +163,7 @@ Both transports — the HTTP IT Ops API and the MCP server — read and write
 the same SQLite database (`services/it_ops_api/it_ops.db`). A ticket created
 from VS Code Copilot Chat shows up in the web Tickets page, and vice versa.
 
-Three layers of evidence for graders:
+Three layers to create MCP:
 
 1. **Code** — `mcp_server/store.py` shows the shared store helpers wrapped
    by both the FastMCP tools and the FastAPI ops API.
