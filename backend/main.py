@@ -6,7 +6,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,8 +46,8 @@ app.add_middleware(
 # In-memory state — fine for local dev. Phase-4 follow-up: move to Redis/DB.
 # ---------------------------------------------------------------------------
 
-sessions: Dict[str, SessionState] = {}
-request_log: List[Dict[str, Any]] = []
+sessions: dict[str, SessionState] = {}
+request_log: list[dict[str, Any]] = []
 app_start_time: datetime = datetime.now()
 ops_client = ItOpsClient()
 
@@ -176,7 +176,9 @@ def chat(payload: UserMessage) -> AgentResponse:
         session.escalated = True
     if ticket and ticket.get("ticket_id"):
         try:
-            session.current_ticket = TicketResponse(**_normalize_ticket(ticket, payload.session_id))
+            session.current_ticket = TicketResponse(
+                **_normalize_ticket(ticket, payload.session_id)
+            )
         except Exception as exc:  # noqa: BLE001
             logger.warning("Could not coerce ticket into TicketResponse: %s", exc)
 
@@ -292,9 +294,7 @@ def submit_feedback(payload: FeedbackCreate) -> dict:
         comment=payload.comment,
     )
     if result is None:
-        raise HTTPException(
-            status_code=503, detail="ops API is not reachable"
-        )
+        raise HTTPException(status_code=503, detail="ops API is not reachable")
     return result
 
 
@@ -304,7 +304,8 @@ def delete_ticket_endpoint(ticket_id: str) -> dict:
     deleted = ops_client.delete_ticket(ticket_id)
     if not deleted:
         raise HTTPException(
-            status_code=404, detail=f"Ticket {ticket_id} not found or ops API unreachable"
+            status_code=404,
+            detail=f"Ticket {ticket_id} not found or ops API unreachable",
         )
     return {"deleted": True, "ticket_id": ticket_id}
 
@@ -317,9 +318,7 @@ def update_ticket_status(ticket_id: str, payload: dict) -> dict:
         raise HTTPException(status_code=400, detail="new_status is required")
     result = ops_client.update_status(ticket_id, new_status)
     if result is None:
-        raise HTTPException(
-            status_code=503, detail="ops API is not reachable"
-        )
+        raise HTTPException(status_code=503, detail="ops API is not reachable")
     return result
 
 

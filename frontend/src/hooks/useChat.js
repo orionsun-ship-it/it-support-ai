@@ -98,14 +98,14 @@ export default function useChat(sessionId) {
         setIsLoading(false);
       }
     },
-    [sessionId]
+    [sessionId],
   );
 
   const submitFeedback = useCallback(
     async (messageId, sentiment) => {
       // Optimistic update so the UI feels instant.
       setMessages((prev) =>
-        prev.map((m) => (m.id === messageId ? { ...m, feedback: sentiment } : m))
+        prev.map((m) => (m.id === messageId ? { ...m, feedback: sentiment } : m)),
       );
       try {
         await fetch('/api/feedback', {
@@ -119,13 +119,11 @@ export default function useChat(sessionId) {
         });
       } catch (err) {
         // Roll back on failure.
-        setMessages((prev) =>
-          prev.map((m) => (m.id === messageId ? { ...m, feedback: null } : m))
-        );
+        setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, feedback: null } : m)));
         setErrorBanner('Could not record feedback. Please try again.');
       }
     },
-    [sessionId]
+    [sessionId],
   );
 
   return {

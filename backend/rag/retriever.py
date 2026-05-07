@@ -123,9 +123,7 @@ class KnowledgeRetriever:
             query=query, match_strength=strength, sources=sources, raw=raw
         )
 
-    def _keyword_rescue(
-        self, query: str, current: list[dict]
-    ) -> list[dict]:
+    def _keyword_rescue(self, query: str, current: list[dict]) -> list[dict]:
         if not any(p.search(query) for p in _KEYWORD_PATTERNS):
             return []
         # If the top result already contains a matching keyword, we're fine.

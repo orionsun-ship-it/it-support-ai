@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, Query, status
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlmodel import Session, select
@@ -72,7 +71,7 @@ class PriorityUpdateBody(BaseModel):
 
 class AnalyzeLogsBody(BaseModel):
     log_file: str
-    severity: Optional[str] = None
+    severity: str | None = None
     last_n_lines: int = 20
 
 
@@ -145,10 +144,10 @@ def create_ticket(
 
 @app.get("/api/v1/tickets", dependencies=[Depends(require_service_token)])
 def list_tickets(
-    category: Optional[str] = Query(default=None),
-    status_: Optional[str] = Query(default=None, alias="status"),
+    category: str | None = Query(default=None),
+    status_: str | None = Query(default=None, alias="status"),
     session: Session = Depends(get_session),
-) -> List[dict]:
+) -> list[dict]:
     stmt = select(Ticket)
     if category:
         stmt = stmt.where(Ticket.category == category)
@@ -265,7 +264,7 @@ def delete_ticket(ticket_id: str, session: Session = Depends(get_session)) -> di
     "/api/v1/tickets/{ticket_id}/events",
     dependencies=[Depends(require_service_token)],
 )
-def get_events(ticket_id: str, session: Session = Depends(get_session)) -> List[dict]:
+def get_events(ticket_id: str, session: Session = Depends(get_session)) -> list[dict]:
     rows = session.exec(
         select(TicketEvent)
         .where(TicketEvent.ticket_id == ticket_id)
@@ -306,9 +305,7 @@ def submit_feedback(
     body: FeedbackBody, session: Session = Depends(get_session)
 ) -> dict:
     if body.sentiment not in ("up", "down"):
-        raise HTTPException(
-            status_code=400, detail="sentiment must be 'up' or 'down'"
-        )
+        raise HTTPException(status_code=400, detail="sentiment must be 'up' or 'down'")
     fb = Feedback(
         session_id=body.session_id,
         message_id=body.message_id,

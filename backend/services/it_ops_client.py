@@ -213,7 +213,12 @@ class ItOpsClient:
             return resp.json()
         except httpx.RequestError as exc:
             logger.warning("ops-api unreachable for feedback_summary: %s", exc)
-            return {"total": 0, "thumbs_up": 0, "thumbs_down": 0, "satisfaction_score": 0.0}
+            return {
+                "total": 0,
+                "thumbs_up": 0,
+                "thumbs_down": 0,
+                "satisfaction_score": 0.0,
+            }
 
     def is_available(self, timeout: float = 2.0) -> bool:
         try:

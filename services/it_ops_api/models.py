@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from sqlmodel import Field, SQLModel
 
@@ -32,7 +31,7 @@ class Ticket(SQLModel, table=True):
 class TicketEvent(SQLModel, table=True):
     __tablename__ = "ticket_events"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     ticket_id: str = Field(index=True, foreign_key="tickets.ticket_id")
     event_type: str  # created, status_changed, priority_changed, comment
     detail: str = ""
@@ -43,7 +42,7 @@ class TicketEvent(SQLModel, table=True):
 class AuditLog(SQLModel, table=True):
     __tablename__ = "audit_logs"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     actor: str
     action: str  # e.g. tickets.create, tickets.status_change
     target: str = ""  # e.g. ticket_id
@@ -56,7 +55,7 @@ class Feedback(SQLModel, table=True):
 
     __tablename__ = "feedback"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     session_id: str = Field(index=True)
     message_id: str = Field(index=True)  # frontend-generated id of the assistant turn
     sentiment: str  # "up" | "down"

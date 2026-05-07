@@ -12,8 +12,8 @@ at the deeper docs for graders who want to dig.
 ## Slide 1 — Title & one-line pitch
 
 **IT Support AI** — A multi-agent, RAG-grounded, MCP-standardised IT
-support assistant. *Auto-resolve the resolvable, escalate the rest
-cleanly.*
+support assistant. _Auto-resolve the resolvable, escalate the rest
+cleanly._
 
 > The pitch in one breath: most IT tickets are repetitive and
 > answerable from a runbook. This system answers them in chat, runs safe
@@ -44,15 +44,15 @@ Deep dive: [`PRODUCT.md`](PRODUCT.md) §1 (Pain points + personas).
 
 ## Slide 3 — Success metrics (Checkpoint 1)
 
-| Axis                                | Target | Measured by                  |
-| ----------------------------------- | ------ | ---------------------------- |
-| Self-serve resolution rate          | ≥ 60 % | Pilot                        |
-| First response (assistant)          | < 10 s | Pilot                        |
-| Avg time-to-resolve (self-served)   | < 2 min| Pilot                        |
-| CSAT (👍 / 👍+👎)                   | ≥ 80 % | `/feedback` endpoint         |
-| Routing correctness (every branch)  | 100 %  | `tests/test_routing.py`      |
-| Category classification (live LLM)  | ≥ 85 % | `tests/test_accuracy.py`     |
-| MCP↔HTTP cross-transport parity     | 100 %  | `tests/test_mcp_proof.py`    |
+| Axis                               | Target  | Measured by               |
+| ---------------------------------- | ------- | ------------------------- |
+| Self-serve resolution rate         | ≥ 60 %  | Pilot                     |
+| First response (assistant)         | < 10 s  | Pilot                     |
+| Avg time-to-resolve (self-served)  | < 2 min | Pilot                     |
+| CSAT (👍 / 👍+👎)                  | ≥ 80 %  | `/feedback` endpoint      |
+| Routing correctness (every branch) | 100 %   | `tests/test_routing.py`   |
+| Category classification (live LLM) | ≥ 85 %  | `tests/test_accuracy.py`  |
+| MCP↔HTTP cross-transport parity    | 100 %   | `tests/test_mcp_proof.py` |
 
 > System metrics are already enforced — the deterministic harness blocks
 > regressions on every PR. Product metrics need a pilot but the
@@ -144,15 +144,15 @@ Deep dive: [`PRODUCT.md`](PRODUCT.md) §4.
 
 ## Slide 7 — Workflow automation (Checkpoint 5)
 
-| Intent                  | Status      | What it does                                        |
-| ----------------------- | ----------- | --------------------------------------------------- |
-| `password_reset`        | Simulated   | Returns a `[Simulated]` reset-link confirmation.    |
-| `account_unlock`        | Simulated   | Returns a `[Simulated]` unlock confirmation.        |
-| `software_license_check`| Simulated   | Returns a `[Simulated]` license-active answer.      |
-| `software_install`      | Simulated   | Returns a `[Simulated]` install-request answer.     |
-| `access_request`        | Simulated   | Returns a `[Simulated]` access-request answer.      |
-| `vpn_log_check`         | **Real**    | Reads sample log files via `/api/v1/logs/analyze`.  |
-| `status_check`          | **Real**    | Queries the actual ticket DB for the session.       |
+| Intent                   | Status    | What it does                                       |
+| ------------------------ | --------- | -------------------------------------------------- |
+| `password_reset`         | Simulated | Returns a `[Simulated]` reset-link confirmation.   |
+| `account_unlock`         | Simulated | Returns a `[Simulated]` unlock confirmation.       |
+| `software_license_check` | Simulated | Returns a `[Simulated]` license-active answer.     |
+| `software_install`       | Simulated | Returns a `[Simulated]` install-request answer.    |
+| `access_request`         | Simulated | Returns a `[Simulated]` access-request answer.     |
+| `vpn_log_check`          | **Real**  | Reads sample log files via `/api/v1/logs/analyze`. |
+| `status_check`           | **Real**  | Queries the actual ticket DB for the session.      |
 
 - Every simulated path is tagged `automation_simulated: true` in the
   API response, prefixed `[Simulated]` in the text, and shown as a chip
@@ -213,11 +213,11 @@ Deep dive: [`MCP_PROOF.md`](MCP_PROOF.md), [`MCP_VSCode_Demo.md`](MCP_VSCode_Dem
 
 ## Slide 10 — Validation & testing (Checkpoint 8)
 
-| Harness                   | Run command       | What it asserts                            |
-| ------------------------- | ----------------- | ------------------------------------------ |
-| Deterministic routing     | `make test`       | Every conditional edge in the orchestrator. **10/10 scenarios, 100 %** per-axis. |
-| MCP cross-transport proof | `make test-mcp`   | MCP↔HTTP land in the same DB. **5/5 steps**.|
-| Live-LLM accuracy         | `make test-llm`   | Claude classification quality on real text. **≥ 85 %** target. |
+| Harness                   | Run command     | What it asserts                                                                  |
+| ------------------------- | --------------- | -------------------------------------------------------------------------------- |
+| Deterministic routing     | `make test`     | Every conditional edge in the orchestrator. **10/10 scenarios, 100 %** per-axis. |
+| MCP cross-transport proof | `make test-mcp` | MCP↔HTTP land in the same DB. **5/5 steps**.                                     |
+| Live-LLM accuracy         | `make test-llm` | Claude classification quality on real text. **≥ 85 %** target.                   |
 
 - The deterministic harness mocks the LLM-driven agents and the IT Ops
   client, then runs the **real** orchestrator and Workflow / Escalation
@@ -240,20 +240,20 @@ Deep dive: [`VALIDATION.md`](VALIDATION.md).
 
 ## Slide 11 — Industry context
 
-| Capability                         | ServiceNow Now Assist | Zendesk AI | Freshservice Freddy | Moveworks | This capstone   |
-| ---------------------------------- | :-------------------: | :--------: | :-----------------: | :-------: | :-------------: |
-| Conversational LLM front door      |          ✅           |     ✅     |         ✅          |    ✅     |       ✅        |
-| RAG with citations                 |          ✅           |     ✅     |    Limited          |    ✅     |       ✅        |
-| Multi-agent routing                 |          ✅           |  Limited   |    Limited          |    ✅     |       ✅        |
-| **Visible per-turn route trace**    |          ❌           |     ❌     |         ❌          |    ❌     |       ✅        |
-| **Vendor-neutral tool protocol**    |          ❌           |     ❌     |         ❌          |    ❌     |  ✅ (MCP)       |
-| **Deterministic open routing tests**|          ❌           |     ❌     |         ❌          |    ❌     |       ✅        |
-| **Honest stub labelling**           |          ❌           |     ❌     |         ❌          |    ❌     |       ✅        |
-| Out-of-the-box integrations        |          ✅           |     ✅     |         ✅          |    ✅     |   Stubbed       |
-| Multi-tenant / RBAC                 |          ✅           |     ✅     |         ✅          |    ✅     |   Single-tenant |
+| Capability                           | ServiceNow Now Assist | Zendesk AI | Freshservice Freddy | Moveworks | This capstone |
+| ------------------------------------ | :-------------------: | :--------: | :-----------------: | :-------: | :-----------: |
+| Conversational LLM front door        |          ✅           |     ✅     |         ✅          |    ✅     |      ✅       |
+| RAG with citations                   |          ✅           |     ✅     |       Limited       |    ✅     |      ✅       |
+| Multi-agent routing                  |          ✅           |  Limited   |       Limited       |    ✅     |      ✅       |
+| **Visible per-turn route trace**     |          ❌           |     ❌     |         ❌          |    ❌     |      ✅       |
+| **Vendor-neutral tool protocol**     |          ❌           |     ❌     |         ❌          |    ❌     |   ✅ (MCP)    |
+| **Deterministic open routing tests** |          ❌           |     ❌     |         ❌          |    ❌     |      ✅       |
+| **Honest stub labelling**            |          ❌           |     ❌     |         ❌          |    ❌     |      ✅       |
+| Out-of-the-box integrations          |          ✅           |     ✅     |         ✅          |    ✅     |    Stubbed    |
+| Multi-tenant / RBAC                  |          ✅           |     ✅     |         ✅          |    ✅     | Single-tenant |
 
 > The trade-off is clear. We can't compete on integrations or
-> multi-tenant. We *can* compete on auditability, openness, and
+> multi-tenant. We _can_ compete on auditability, openness, and
 > standardised interoperability.
 
 Deep dive: [`INDUSTRY_COMPARISON.md`](INDUSTRY_COMPARISON.md).
@@ -264,13 +264,13 @@ Deep dive: [`INDUSTRY_COMPARISON.md`](INDUSTRY_COMPARISON.md).
 
 1. `make dev` → ops API + backend + frontend up.
 2. Open `http://localhost:5173`.
-3. **Knowledge-only**: ask *"How do I clear my browser cache?"* — show
+3. **Knowledge-only**: ask _"How do I clear my browser cache?"_ — show
    citations + route `intake → knowledge → final_response`.
-4. **Automation, simulated**: ask *"I forgot my password and need a
-   reset link."* — show `[Simulated]` chip, route
+4. **Automation, simulated**: ask _"I forgot my password and need a
+   reset link."_ — show `[Simulated]` chip, route
    `intake → knowledge → workflow → final_response`.
-5. **Urgent escalation**: ask *"VPN is down for the whole team and
-   nobody can work."* — show ticket created + escalation chip + route
+5. **Urgent escalation**: ask _"VPN is down for the whole team and
+   nobody can work."_ — show ticket created + escalation chip + route
    `intake → knowledge → workflow → escalation → final_response`.
 6. **Tickets page**: refresh; show the urgent ticket with priority
    `critical`. Open the detail panel; flip status to `resolved`.
@@ -278,8 +278,8 @@ Deep dive: [`INDUSTRY_COMPARISON.md`](INDUSTRY_COMPARISON.md).
    report and the matching Tickets-page row in the dev DB.
 
 > If demo gods cooperate, also: open VS Code Copilot Chat with
-> `.vscode/mcp.json` configured; ask *"Use the IT support tools to open
-> a ticket: title 'demo', category software, priority low"*. Refresh
+> `.vscode/mcp.json` configured; ask _"Use the IT support tools to open
+> a ticket: title 'demo', category software, priority low"_. Refresh
 > the web Tickets page — the VS-Code-created ticket is right there.
 
 ---
@@ -303,17 +303,17 @@ Deep dive: [`INDUSTRY_COMPARISON.md`](INDUSTRY_COMPARISON.md).
 
 ## Slide 14 — Risks & mitigations
 
-| Risk                                                    | Mitigation                                                  |
-| ------------------------------------------------------- | ----------------------------------------------------------- |
-| LLM mis-classification triggers a wrong automation      | Workflow agent acts on **structured intake output**, not    |
-|                                                         | raw LLM text. Automatable intents are an enum.              |
-| KB doc instructs the model to bypass routing            | Knowledge agent's prompt cites docs but routing is decided  |
-|                                                         | upstream by Intake's structured fields, not by KB text.     |
-| Ops API offline → ticket loss                           | `it_ops_client.py` returns `LOCAL-...` fallback id; UI      |
-|                                                         | shows banner; ticket is recorded locally and synced later.  |
-| Single-tenant assumption breaks under multi-org demand  | Add tenant column + auth middleware; bounded change.        |
-| Live-LLM costs balloon at scale                         | Haiku is the default; Sonnet/Opus are opt-in via env.       |
-|                                                         | Caching common intake responses is phase-2 work.            |
+| Risk                                                   | Mitigation                                                 |
+| ------------------------------------------------------ | ---------------------------------------------------------- |
+| LLM mis-classification triggers a wrong automation     | Workflow agent acts on **structured intake output**, not   |
+|                                                        | raw LLM text. Automatable intents are an enum.             |
+| KB doc instructs the model to bypass routing           | Knowledge agent's prompt cites docs but routing is decided |
+|                                                        | upstream by Intake's structured fields, not by KB text.    |
+| Ops API offline → ticket loss                          | `it_ops_client.py` returns `LOCAL-...` fallback id; UI     |
+|                                                        | shows banner; ticket is recorded locally and synced later. |
+| Single-tenant assumption breaks under multi-org demand | Add tenant column + auth middleware; bounded change.       |
+| Live-LLM costs balloon at scale                        | Haiku is the default; Sonnet/Opus are opt-in via env.      |
+|                                                        | Caching common intake responses is phase-2 work.           |
 
 ---
 

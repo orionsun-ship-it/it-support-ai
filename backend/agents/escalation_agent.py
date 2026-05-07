@@ -41,9 +41,7 @@ class EscalationAgent:
         state["ticket"] = result.ticket
         state["ops_api_unavailable"] = result.is_fallback
         state["should_create_ticket"] = True
-        state.setdefault(
-            "ticket_decision_reason", "escalation requires a ticket"
-        )
+        state.setdefault("ticket_decision_reason", "escalation requires a ticket")
         return result.ticket
 
     def run(self, state: dict) -> dict:

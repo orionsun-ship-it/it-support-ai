@@ -16,23 +16,24 @@ We compare against four widely-deployed products:
 
 ## 1. Capability matrix
 
-| Capability                                              | ServiceNow Now Assist | Zendesk AI | Freshservice Freddy | Moveworks | **This capstone** |
-| ------------------------------------------------------- | :-------------------: | :--------: | :-----------------: | :-------: | :---------------: |
-| Conversational LLM front door                           |          ✅           |     ✅     |         ✅          |    ✅     |        ✅         |
-| RAG over company knowledge base                         |          ✅           |     ✅     |         ✅          |    ✅     |        ✅         |
-| Cited sources in answers                                |          ✅           |     ✅     |    Limited          |    ✅     |        ✅         |
-| Routing to multiple specialised agents                  |          ✅           |  Limited   |    Limited          |    ✅     |        ✅         |
-| Visible route trace per response                        |        ❌             |     ❌     |         ❌          |    ❌     |        ✅         |
-| Native ticketing                                        |     ✅ (own ITSM)    |  ✅ (own)  |     ✅ (own)        | Integrates |        ✅         |
-| Integrations to identity / asset systems                |        ✅             |     ✅     |         ✅          |    ✅     |  Stubbed (✓ shape)|
-| Bring-your-own-LLM model                                |        ✅             |  Limited   |    Limited          |    ✅     |        ✅         |
-| Vendor-neutral tool protocol (MCP-like)                 |        ❌             |     ❌     |         ❌          |    ❌     |        ✅ (MCP)   |
-| Open-source / forkable                                  |        ❌             |     ❌     |         ❌          |    ❌     |        ✅         |
-| Per-turn explainability (severity, urgency, intent)     |     Partial          |  Partial   |    Partial          |  Partial  |        ✅         |
-| Deterministic routing tests                             |     Internal         |  Internal  |    Internal         |  Internal |        ✅ (open)  |
-| Honest "simulated automation" labelling                 |     Hidden           |  Hidden    |    Hidden           |  Hidden   |        ✅         |
+| Capability                                          | ServiceNow Now Assist | Zendesk AI | Freshservice Freddy | Moveworks  | **This capstone** |
+| --------------------------------------------------- | :-------------------: | :--------: | :-----------------: | :--------: | :---------------: |
+| Conversational LLM front door                       |          ✅           |     ✅     |         ✅          |     ✅     |        ✅         |
+| RAG over company knowledge base                     |          ✅           |     ✅     |         ✅          |     ✅     |        ✅         |
+| Cited sources in answers                            |          ✅           |     ✅     |       Limited       |     ✅     |        ✅         |
+| Routing to multiple specialised agents              |          ✅           |  Limited   |       Limited       |     ✅     |        ✅         |
+| Visible route trace per response                    |          ❌           |     ❌     |         ❌          |     ❌     |        ✅         |
+| Native ticketing                                    |     ✅ (own ITSM)     |  ✅ (own)  |      ✅ (own)       | Integrates |        ✅         |
+| Integrations to identity / asset systems            |          ✅           |     ✅     |         ✅          |     ✅     | Stubbed (✓ shape) |
+| Bring-your-own-LLM model                            |          ✅           |  Limited   |       Limited       |     ✅     |        ✅         |
+| Vendor-neutral tool protocol (MCP-like)             |          ❌           |     ❌     |         ❌          |     ❌     |     ✅ (MCP)      |
+| Open-source / forkable                              |          ❌           |     ❌     |         ❌          |     ❌     |        ✅         |
+| Per-turn explainability (severity, urgency, intent) |        Partial        |  Partial   |       Partial       |  Partial   |        ✅         |
+| Deterministic routing tests                         |       Internal        |  Internal  |      Internal       |  Internal  |     ✅ (open)     |
+| Honest "simulated automation" labelling             |        Hidden         |   Hidden   |       Hidden        |   Hidden   |        ✅         |
 
 Sources:
+
 - ServiceNow: <https://www.servicenow.com/products/now-assist.html>
 - Zendesk AI: <https://www.zendesk.com/service/ai/>
 - Freshservice Freddy: <https://www.freshworks.com/freshservice/freddy-ai/>

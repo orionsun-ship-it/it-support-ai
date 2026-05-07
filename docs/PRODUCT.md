@@ -46,12 +46,12 @@ shouldn't have to touch.
 
 ### 1.2 Who we serve
 
-| Persona                | What they want                                                                  |
-| ---------------------- | ------------------------------------------------------------------------------- |
-| **End user** (employee)| Fast, accurate answer to a simple IT issue without a ticket round-trip.         |
-| **Tier-1 IT agent**    | Auto-resolve the easy cases; auto-summarise the hard ones; one source of truth. |
-| **IT manager**         | Lower MTTR, fewer escalations, visibility into where people are stuck.          |
-| **Compliance / audit** | An auditable trail of who did what, when, and why — including AI actions.       |
+| Persona                 | What they want                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| **End user** (employee) | Fast, accurate answer to a simple IT issue without a ticket round-trip.         |
+| **Tier-1 IT agent**     | Auto-resolve the easy cases; auto-summarise the hard ones; one source of truth. |
+| **IT manager**          | Lower MTTR, fewer escalations, visibility into where people are stuck.          |
+| **Compliance / audit**  | An auditable trail of who did what, when, and why — including AI actions.       |
 
 This MVP focuses on the **end user** first (chat UI, automated resolution
 where safe) and the **agent / manager** second (Tickets and Metrics views,
@@ -87,28 +87,28 @@ metrics** (does the routing actually do what we say it does?).
 
 ### 2.1 Product metrics (target after pilot)
 
-| Metric                             | Definition                                            | Target  |
-| ---------------------------------- | ----------------------------------------------------- | ------- |
-| **Self-serve resolution rate**     | % of conversations that end without escalation.       | ≥ 60 %  |
-| **First-response time (assistant)**| Time from user message to first assistant reply.      | < 10 s  |
-| **Avg time-to-resolve (assistant)**| For self-served conversations, time to last message.  | < 2 min |
-| **CSAT (👍 / 👍+👎)**              | Per-turn feedback recorded via the Feedback endpoint. | ≥ 80 %  |
-| **Escalation precision**           | % of escalated tickets that the human agent agrees    | ≥ 90 %  |
-|                                    | were appropriate to escalate.                         |         |
+| Metric                              | Definition                                            | Target  |
+| ----------------------------------- | ----------------------------------------------------- | ------- |
+| **Self-serve resolution rate**      | % of conversations that end without escalation.       | ≥ 60 %  |
+| **First-response time (assistant)** | Time from user message to first assistant reply.      | < 10 s  |
+| **Avg time-to-resolve (assistant)** | For self-served conversations, time to last message.  | < 2 min |
+| **CSAT (👍 / 👍+👎)**               | Per-turn feedback recorded via the Feedback endpoint. | ≥ 80 %  |
+| **Escalation precision**            | % of escalated tickets that the human agent agrees    | ≥ 90 %  |
+|                                     | were appropriate to escalate.                         |         |
 
 ### 2.2 System metrics (already enforced in tests)
 
 These ensure the routing behaves the way we promise. Every PR runs the
 deterministic harness; the live-LLM harness runs on demand.
 
-| Axis                                         | Target | Measured by                        |
-| -------------------------------------------- | ------ | ---------------------------------- |
-| Correct route trace                          | 100 %  | `tests/test_routing.py`            |
-| Correct ticket-creation decision             | 100 %  | `tests/test_routing.py`            |
-| Correct escalation decision                  | 100 %  | `tests/test_routing.py`            |
-| Correct automation status                    | 100 %  | `tests/test_routing.py`            |
-| MCP↔HTTP cross-transport parity              | 100 %  | `tests/test_mcp_proof.py`          |
-| Category classification accuracy (live LLM)  | ≥ 85 % | `tests/test_accuracy.py`           |
+| Axis                                        | Target | Measured by               |
+| ------------------------------------------- | ------ | ------------------------- |
+| Correct route trace                         | 100 %  | `tests/test_routing.py`   |
+| Correct ticket-creation decision            | 100 %  | `tests/test_routing.py`   |
+| Correct escalation decision                 | 100 %  | `tests/test_routing.py`   |
+| Correct automation status                   | 100 %  | `tests/test_routing.py`   |
+| MCP↔HTTP cross-transport parity             | 100 %  | `tests/test_mcp_proof.py` |
+| Category classification accuracy (live LLM) | ≥ 85 % | `tests/test_accuracy.py`  |
 
 See [`VALIDATION.md`](VALIDATION.md) for the latest results.
 
@@ -196,14 +196,14 @@ is the practical demonstration of vendor-neutral standardisation.
 
 ### 3.4 Scope discipline (what we said no to)
 
-| Idea                                                   | Why we said no (for MVP)                                   |
-| ------------------------------------------------------ | ---------------------------------------------------------- |
+| Idea                                                  | Why we said no (for MVP)                                   |
+| ----------------------------------------------------- | ---------------------------------------------------------- |
 | LLM-driven routing (let the model pick the next node) | Less predictable, harder to test, harder to audit.         |
-| Auto-resolution of access requests without approval    | The blast radius is high; the value is low for capstone.   |
-| Real Okta / Entra / Slack / Jira integrations          | Stubs preserve the architectural shape; real adapters can  |
-|                                                        | be added per-intent in `workflow_agent.py` without churn.  |
-| Multi-tenant deployment story                          | Single-tenant assumption made the auth + CORS story clean. |
-| Voice / Slack channels                                 | Same backend would serve them; UI surface is the change.   |
+| Auto-resolution of access requests without approval   | The blast radius is high; the value is low for capstone.   |
+| Real Okta / Entra / Slack / Jira integrations         | Stubs preserve the architectural shape; real adapters can  |
+|                                                       | be added per-intent in `workflow_agent.py` without churn.  |
+| Multi-tenant deployment story                         | Single-tenant assumption made the auth + CORS story clean. |
+| Voice / Slack channels                                | Same backend would serve them; UI surface is the change.   |
 
 ### 3.5 Roadmap (phase 2 / pilot)
 

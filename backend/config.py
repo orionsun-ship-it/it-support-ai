@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List
 
 from dotenv import load_dotenv
 from pydantic import Field, field_validator
@@ -38,10 +37,10 @@ class Settings(BaseSettings):
     chat_model: str = Field(default="claude-haiku-4-5-20251001", alias="CHAT_MODEL")
 
     # --- IT Ops API ---
-    it_ops_api_url: str = Field(
-        default="http://localhost:8001", alias="IT_OPS_API_URL"
+    it_ops_api_url: str = Field(default="http://localhost:8001", alias="IT_OPS_API_URL")
+    it_ops_api_token: str = Field(
+        default="dev-local-only-token", alias="IT_OPS_API_TOKEN"
     )
-    it_ops_api_token: str = Field(default="dev-local-only-token", alias="IT_OPS_API_TOKEN")
     it_ops_db_path: str = Field(
         default=str(PROJECT_ROOT / "services" / "it_ops_api" / "it_ops.db"),
         alias="IT_OPS_DB_PATH",
@@ -54,21 +53,15 @@ class Settings(BaseSettings):
     kb_dir: str = Field(
         default=str(PROJECT_ROOT / "backend" / "data" / "kb"), alias="KB_DIR"
     )
-    rag_distance_threshold: float = Field(
-        default=0.85, alias="RAG_DISTANCE_THRESHOLD"
-    )
-    embedding_model: str = Field(
-        default="all-MiniLM-L6-v2", alias="EMBEDDING_MODEL"
-    )
+    rag_distance_threshold: float = Field(default=0.85, alias="RAG_DISTANCE_THRESHOLD")
+    embedding_model: str = Field(default="all-MiniLM-L6-v2", alias="EMBEDDING_MODEL")
 
     # --- App ---
     env: str = Field(default="dev", alias="ENV")
     allowed_origins: str = Field(
         default="http://localhost:5173", alias="ALLOWED_ORIGINS"
     )
-    enable_debug_endpoints: bool = Field(
-        default=True, alias="ENABLE_DEBUG_ENDPOINTS"
-    )
+    enable_debug_endpoints: bool = Field(default=True, alias="ENABLE_DEBUG_ENDPOINTS")
 
     @field_validator("rag_distance_threshold")
     @classmethod
@@ -78,7 +71,7 @@ class Settings(BaseSettings):
         return v
 
     @property
-    def allowed_origins_list(self) -> List[str]:
+    def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
 
     @property

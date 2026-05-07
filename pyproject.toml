@@ -13,5 +13,24 @@ extend-exclude = [".venv", "chroma_db", "node_modules", "frontend"]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501"]
 
+[tool.ruff.lint.flake8-bugbear]
+# Depends() in argument defaults is the standard FastAPI dependency-injection
+# pattern. Query() / Body() / Header() etc. work the same way.
+extend-immutable-calls = [
+  "fastapi.Depends",
+  "fastapi.Query",
+  "fastapi.Body",
+  "fastapi.Header",
+  "fastapi.Path",
+  "fastapi.Cookie",
+  "fastapi.Form",
+  "fastapi.File",
+]
+
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["B011"]
+"tests/*" = ["B011", "E402"]
+# The orchestrator's docstring captures the routing tree, so its file-level
+# stub setup (env vars, ops-client patches) must run before backend imports.
+"tests/test_routing.py" = ["E402"]
+"tests/test_accuracy.py" = ["E402"]
+"tests/test_mcp_proof.py" = ["E402"]

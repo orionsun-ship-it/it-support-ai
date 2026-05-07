@@ -72,15 +72,15 @@ to surface vs. hide. The implementation lives in `frontend/src/`.
 
 What's surfaced and why:
 
-| Surface element                | Reason                                                         |
-| ------------------------------ | -------------------------------------------------------------- |
-| Sidebar status pill            | Operators see ops-API/KB health at a glance.                   |
-| Session id + "New session"     | Easy way to reset state during a demo or for a real user.      |
-| `kb match · strong/weak`       | The user can tell when the answer is grounded vs. best-effort. |
-| Sources block                  | Citations build trust. Click a doc id → Sources page deeplink. |
-| Route-trace strip              | Default-collapsed; expandable. Grader / operator-facing.       |
+| Surface element                  | Reason                                                         |
+| -------------------------------- | -------------------------------------------------------------- |
+| Sidebar status pill              | Operators see ops-API/KB health at a glance.                   |
+| Session id + "New session"       | Easy way to reset state during a demo or for a real user.      |
+| `kb match · strong/weak`         | The user can tell when the answer is grounded vs. best-effort. |
+| Sources block                    | Citations build trust. Click a doc id → Sources page deeplink. |
+| Route-trace strip                | Default-collapsed; expandable. Grader / operator-facing.       |
 | 👍 👎 buttons per assistant turn | Per-turn satisfaction; feeds the `/feedback` endpoint.         |
-| `Simulated automation` chip    | Shown only when an automation is a stub. Honesty is the point. |
+| `Simulated automation` chip      | Shown only when an automation is a stub. Honesty is the point. |
 
 ### 2.2 Chat (urgent VPN outage — fully traced)
 

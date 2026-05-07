@@ -1,5 +1,16 @@
 # IT Support AI — Architecture
 
+This file is the **static topology** view: what components exist and
+how they are wired. Two companions:
+
+- [`workflow.md`](workflow.md) — what flows between these components on
+  a single chat turn (sequence diagrams, one per representative path).
+- [`wireframes.md`](wireframes.md) — what the user sees as those flows
+  unfold (per-page mockups + cross-page transitions).
+
+If you only have time for one, read [`workflow.md`](workflow.md) — it
+links the boxes here to the user-visible chips in `wireframes.md`.
+
 ## High-level system
 
 ```mermaid

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-const STATUSES = ["open", "in_progress", "escalated", "resolved"];
+const STATUSES = ['open', 'in_progress', 'escalated', 'resolved'];
 
 export default function TicketsPage() {
   const [tickets, setTickets] = useState([]);
@@ -14,7 +14,7 @@ export default function TicketsPage() {
     setLoading(true);
     setError(null);
     try {
-      const resp = await fetch("/api/tickets");
+      const resp = await fetch('/api/tickets');
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
       setTickets(Array.isArray(data) ? data : []);
@@ -28,7 +28,7 @@ export default function TicketsPage() {
   const deleteTicket = async (ticketId) => {
     setDeletingId(ticketId);
     try {
-      const resp = await fetch(`/api/tickets/${ticketId}`, { method: "DELETE" });
+      const resp = await fetch(`/api/tickets/${ticketId}`, { method: 'DELETE' });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       setTickets((prev) => prev.filter((t) => t.ticket_id !== ticketId));
       if (openId === ticketId) setOpenId(null);
@@ -43,15 +43,13 @@ export default function TicketsPage() {
     setUpdatingId(ticketId);
     try {
       const resp = await fetch(`/api/tickets/${ticketId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ new_status: newStatus }),
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const updated = await resp.json();
-      setTickets((prev) =>
-        prev.map((t) => (t.ticket_id === ticketId ? { ...t, ...updated } : t))
-      );
+      setTickets((prev) => prev.map((t) => (t.ticket_id === ticketId ? { ...t, ...updated } : t)));
     } catch (err) {
       setError(`Status update failed: ${err.message || String(err)}`);
     } finally {
@@ -64,7 +62,7 @@ export default function TicketsPage() {
   }, []);
 
   return (
-    <div style={{ padding: "32px 32px 40px", maxWidth: 1180, margin: "0 auto" }}>
+    <div style={{ padding: '32px 32px 40px', maxWidth: 1180, margin: '0 auto' }}>
       <PageHeader
         title="Tickets"
         subtitle="All issues opened by the assistant or filed manually. Click a row to view details and change status."
@@ -74,38 +72,36 @@ export default function TicketsPage() {
       <div
         style={{
           marginTop: 24,
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-xs)",
-          overflow: "hidden",
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-xs)',
+          overflow: 'hidden',
         }}
       >
         <div
           style={{
-            padding: "14px 20px",
-            borderBottom: "1px solid var(--border)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            background: "var(--surface-soft)",
+            padding: '14px 20px',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background: 'var(--surface-soft)',
           }}
         >
-          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-            <span style={{ fontWeight: 600, color: "var(--text)" }}>
-              {tickets.length}
-            </span>{" "}
-            ticket{tickets.length === 1 ? "" : "s"}
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+            <span style={{ fontWeight: 600, color: 'var(--text)' }}>{tickets.length}</span> ticket
+            {tickets.length === 1 ? '' : 's'}
           </div>
         </div>
 
         {error && (
           <div
             style={{
-              padding: "12px 20px",
-              color: "#991b1b",
-              background: "var(--red-soft)",
-              borderBottom: "1px solid #fca5a5",
+              padding: '12px 20px',
+              color: '#991b1b',
+              background: 'var(--red-soft)',
+              borderBottom: '1px solid #fca5a5',
               fontSize: 13,
             }}
           >
@@ -116,10 +112,10 @@ export default function TicketsPage() {
         {tickets.length === 0 && !loading && !error ? (
           <EmptyState />
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
-                <tr style={{ background: "var(--surface-soft)" }}>
+                <tr style={{ background: 'var(--surface-soft)' }}>
                   <Th />
                   <Th>Ticket ID</Th>
                   <Th>Title</Th>
@@ -138,14 +134,13 @@ export default function TicketsPage() {
                         key={t.ticket_id}
                         onClick={() => setOpenId(isOpen ? null : t.ticket_id)}
                         style={{
-                          borderTop: "1px solid var(--border)",
-                          background:
-                            isOpen
-                              ? "#f0f6ff"
-                              : idx % 2 === 0
-                              ? "transparent"
-                              : "var(--surface-soft)",
-                          cursor: "pointer",
+                          borderTop: '1px solid var(--border)',
+                          background: isOpen
+                            ? '#f0f6ff'
+                            : idx % 2 === 0
+                              ? 'transparent'
+                              : 'var(--surface-soft)',
+                          cursor: 'pointer',
                         }}
                       >
                         <Td>
@@ -155,23 +150,21 @@ export default function TicketsPage() {
                           <span
                             className="mono"
                             style={{
-                              background: "#f1f5f9",
-                              padding: "2px 7px",
+                              background: '#f1f5f9',
+                              padding: '2px 7px',
                               borderRadius: 5,
                               fontSize: 12,
-                              color: "#0f172a",
+                              color: '#0f172a',
                             }}
                           >
                             {t.ticket_id}
                           </span>
                         </Td>
                         <Td>
-                          <span style={{ color: "var(--text)" }}>{t.title}</span>
+                          <span style={{ color: 'var(--text)' }}>{t.title}</span>
                         </Td>
                         <Td>
-                          <span style={{ color: "var(--text-secondary)" }}>
-                            {t.category}
-                          </span>
+                          <span style={{ color: 'var(--text-secondary)' }}>{t.category}</span>
                         </Td>
                         <Td>
                           <PriorityChip priority={t.priority} />
@@ -182,20 +175,20 @@ export default function TicketsPage() {
                         <Td>
                           <span
                             className="mono"
-                            style={{ fontSize: 11.5, color: "var(--text-muted)" }}
+                            style={{ fontSize: 11.5, color: 'var(--text-muted)' }}
                           >
                             {formatDate(t.created_at)}
                           </span>
                         </Td>
                       </tr>
                       {isOpen && (
-                        <tr key={t.ticket_id + "-detail"}>
+                        <tr key={t.ticket_id + '-detail'}>
                           <td
                             colSpan={7}
                             style={{
-                              padding: "16px 20px 20px 56px",
-                              background: "var(--surface-soft)",
-                              borderTop: "1px solid var(--border)",
+                              padding: '16px 20px 20px 56px',
+                              background: 'var(--surface-soft)',
+                              borderTop: '1px solid var(--border)',
                             }}
                           >
                             <DetailPanel
@@ -222,14 +215,14 @@ export default function TicketsPage() {
 
 function DetailPanel({ ticket, updating, deleting, onUpdateStatus, onDelete }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div
         style={{
           fontSize: 11,
           fontWeight: 600,
-          color: "var(--text-muted)",
+          color: 'var(--text-muted)',
           letterSpacing: 0.6,
-          textTransform: "uppercase",
+          textTransform: 'uppercase',
         }}
       >
         Description
@@ -237,40 +230,38 @@ function DetailPanel({ ticket, updating, deleting, onUpdateStatus, onDelete }) {
       <div
         style={{
           fontSize: 13.5,
-          color: "var(--text-secondary)",
+          color: 'var(--text-secondary)',
           lineHeight: 1.6,
-          whiteSpace: "pre-wrap",
+          whiteSpace: 'pre-wrap',
           maxWidth: 760,
         }}
       >
-        {ticket.description || "(no description)"}
+        {ticket.description || '(no description)'}
       </div>
 
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", fontSize: 12.5 }}>
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 12.5 }}>
         <Meta label="Severity" value={ticket.severity} />
         <Meta label="Urgency" value={ticket.urgency} />
         <Meta label="Session" value={ticket.session_id} mono />
-        {ticket.updated_at && (
-          <Meta label="Updated" value={formatDate(ticket.updated_at)} />
-        )}
+        {ticket.updated_at && <Meta label="Updated" value={formatDate(ticket.updated_at)} />}
       </div>
 
       <div
         style={{
           marginTop: 4,
-          display: "flex",
+          display: 'flex',
           gap: 8,
-          flexWrap: "wrap",
-          alignItems: "center",
+          flexWrap: 'wrap',
+          alignItems: 'center',
         }}
       >
         <span
           style={{
             fontSize: 11,
             fontWeight: 600,
-            color: "var(--text-muted)",
+            color: 'var(--text-muted)',
             letterSpacing: 0.6,
-            textTransform: "uppercase",
+            textTransform: 'uppercase',
             marginRight: 4,
           }}
         >
@@ -287,26 +278,24 @@ function DetailPanel({ ticket, updating, deleting, onUpdateStatus, onDelete }) {
                 onUpdateStatus(s);
               }}
               style={{
-                padding: "5px 11px",
+                padding: '5px 11px',
                 fontSize: 12,
                 fontWeight: 500,
                 borderRadius: 6,
-                cursor: active || updating ? "not-allowed" : "pointer",
-                border: `1px solid ${active ? "var(--brand)" : "var(--border-strong)"}`,
-                background: active ? "var(--brand)" : "var(--surface)",
-                color: active ? "#fff" : "var(--text)",
+                cursor: active || updating ? 'not-allowed' : 'pointer',
+                border: `1px solid ${active ? 'var(--brand)' : 'var(--border-strong)'}`,
+                background: active ? 'var(--brand)' : 'var(--surface)',
+                color: active ? '#fff' : 'var(--text)',
               }}
             >
-              {s.replace("_", " ")}
+              {s.replace('_', ' ')}
             </button>
           );
         })}
-        {updating && (
-          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>updating…</span>
-        )}
+        {updating && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>updating…</span>}
       </div>
 
-      <div style={{ marginTop: 8, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
+      <div style={{ marginTop: 8, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
         <button
           disabled={deleting || updating}
           onClick={(e) => {
@@ -316,21 +305,21 @@ function DetailPanel({ ticket, updating, deleting, onUpdateStatus, onDelete }) {
             }
           }}
           style={{
-            padding: "6px 12px",
+            padding: '6px 12px',
             fontSize: 12,
             fontWeight: 500,
             borderRadius: 6,
-            cursor: deleting || updating ? "not-allowed" : "pointer",
-            border: "1px solid #fca5a5",
-            background: "var(--red-soft)",
-            color: "#991b1b",
-            display: "inline-flex",
-            alignItems: "center",
+            cursor: deleting || updating ? 'not-allowed' : 'pointer',
+            border: '1px solid #fca5a5',
+            background: 'var(--red-soft)',
+            color: '#991b1b',
+            display: 'inline-flex',
+            alignItems: 'center',
             gap: 6,
           }}
         >
           <TrashIcon />
-          {deleting ? "Deleting…" : "Delete ticket"}
+          {deleting ? 'Deleting…' : 'Delete ticket'}
         </button>
       </div>
     </div>
@@ -340,12 +329,12 @@ function DetailPanel({ ticket, updating, deleting, onUpdateStatus, onDelete }) {
 function Meta({ label, value, mono }) {
   return (
     <div>
-      <span style={{ color: "var(--text-muted)" }}>{label}: </span>
+      <span style={{ color: 'var(--text-muted)' }}>{label}: </span>
       <span
-        className={mono ? "mono" : undefined}
-        style={{ color: "var(--text)", fontWeight: mono ? 400 : 500 }}
+        className={mono ? 'mono' : undefined}
+        style={{ color: 'var(--text)', fontWeight: mono ? 400 : 500 }}
       >
-        {value || "—"}
+        {value || '—'}
       </span>
     </div>
   );
@@ -359,9 +348,9 @@ function Chevron({ open }) {
       viewBox="0 0 24 24"
       fill="none"
       style={{
-        transition: "transform 150ms ease",
-        transform: open ? "rotate(90deg)" : "none",
-        color: "var(--text-muted)",
+        transition: 'transform 150ms ease',
+        transform: open ? 'rotate(90deg)' : 'none',
+        color: 'var(--text-muted)',
       }}
     >
       <path
@@ -377,22 +366,20 @@ function Chevron({ open }) {
 
 function PageHeader({ title, subtitle, right }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
       <div>
         <h2
           style={{
             margin: 0,
             fontSize: 22,
             fontWeight: 600,
-            color: "var(--text)",
+            color: 'var(--text)',
             letterSpacing: -0.3,
           }}
         >
           {title}
         </h2>
-        <div style={{ marginTop: 4, color: "var(--text-muted)", fontSize: 13.5 }}>
-          {subtitle}
-        </div>
+        <div style={{ marginTop: 4, color: 'var(--text-muted)', fontSize: 13.5 }}>{subtitle}</div>
       </div>
       {right}
     </div>
@@ -405,16 +392,16 @@ function RefreshButton({ onClick, loading }) {
       onClick={onClick}
       disabled={loading}
       style={{
-        padding: "8px 14px",
-        background: "var(--surface)",
-        color: "var(--text)",
-        border: "1px solid var(--border-strong)",
+        padding: '8px 14px',
+        background: 'var(--surface)',
+        color: 'var(--text)',
+        border: '1px solid var(--border-strong)',
         borderRadius: 8,
         fontSize: 13,
         fontWeight: 500,
-        boxShadow: "var(--shadow-xs)",
-        display: "inline-flex",
-        alignItems: "center",
+        boxShadow: 'var(--shadow-xs)',
+        display: 'inline-flex',
+        alignItems: 'center',
         gap: 6,
       }}
     >
@@ -427,23 +414,23 @@ function RefreshButton({ onClick, loading }) {
           strokeLinejoin="round"
         />
       </svg>
-      {loading ? "Refreshing…" : "Refresh"}
+      {loading ? 'Refreshing…' : 'Refresh'}
     </button>
   );
 }
 
 function EmptyState() {
   return (
-    <div style={{ padding: "56px 24px", textAlign: "center", color: "var(--text-muted)" }}>
+    <div style={{ padding: '56px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
       <div
         style={{
           width: 48,
           height: 48,
           borderRadius: 12,
-          background: "var(--brand-soft)",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
+          background: 'var(--brand-soft)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           marginBottom: 14,
         }}
       >
@@ -456,12 +443,10 @@ function EmptyState() {
           />
         </svg>
       </div>
-      <div style={{ color: "var(--text)", fontWeight: 500, fontSize: 14 }}>
-        No tickets yet
-      </div>
+      <div style={{ color: 'var(--text)', fontWeight: 500, fontSize: 14 }}>No tickets yet</div>
       <div style={{ marginTop: 4, fontSize: 13 }}>
-        Start a conversation. The assistant only opens a ticket when an issue
-        actually needs follow-up.
+        Start a conversation. The assistant only opens a ticket when an issue actually needs
+        follow-up.
       </div>
     </div>
   );
@@ -471,12 +456,12 @@ function Th({ children }) {
   return (
     <th
       style={{
-        textAlign: "left",
-        padding: "10px 16px",
+        textAlign: 'left',
+        padding: '10px 16px',
         fontWeight: 600,
-        color: "var(--text-muted)",
+        color: 'var(--text-muted)',
         fontSize: 11,
-        textTransform: "uppercase",
+        textTransform: 'uppercase',
         letterSpacing: 0.6,
       }}
     >
@@ -486,32 +471,29 @@ function Th({ children }) {
 }
 
 function Td({ children }) {
-  return (
-    <td style={{ padding: "12px 16px", verticalAlign: "middle" }}>{children}</td>
-  );
+  return <td style={{ padding: '12px 16px', verticalAlign: 'middle' }}>{children}</td>;
 }
 
 function PriorityChip({ priority }) {
-  const cfg =
-    {
-      low: { bg: "var(--green-soft)", color: "#065f46", border: "#6ee7b7" },
-      medium: { bg: "var(--brand-soft)", color: "#1e40af", border: "#bfdbfe" },
-      high: { bg: "var(--amber-soft)", color: "#92400e", border: "#fcd34d" },
-      critical: { bg: "var(--red-soft)", color: "#991b1b", border: "#fca5a5" },
-    }[priority] || { bg: "#f1f5f9", color: "#334155", border: "#cbd5e1" };
+  const cfg = {
+    low: { bg: 'var(--green-soft)', color: '#065f46', border: '#6ee7b7' },
+    medium: { bg: 'var(--brand-soft)', color: '#1e40af', border: '#bfdbfe' },
+    high: { bg: 'var(--amber-soft)', color: '#92400e', border: '#fcd34d' },
+    critical: { bg: 'var(--red-soft)', color: '#991b1b', border: '#fca5a5' },
+  }[priority] || { bg: '#f1f5f9', color: '#334155', border: '#cbd5e1' };
   return (
     <span
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "3px 9px",
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '3px 9px',
         borderRadius: 6,
         background: cfg.bg,
         color: cfg.color,
         border: `1px solid ${cfg.border}`,
         fontSize: 11,
         fontWeight: 600,
-        textTransform: "uppercase",
+        textTransform: 'uppercase',
         letterSpacing: 0.4,
       }}
     >
@@ -521,42 +503,40 @@ function PriorityChip({ priority }) {
 }
 
 function StatusChip({ status }) {
-  if (status === "escalated") {
+  if (status === 'escalated') {
     return (
-      <span
-        style={pill("var(--red-soft)", "#991b1b", "#fca5a5")}
-      >
+      <span style={pill('var(--red-soft)', '#991b1b', '#fca5a5')}>
         <DotInline color="#dc2626" /> escalated
       </span>
     );
   }
-  if (status === "resolved" || status === "closed") {
+  if (status === 'resolved' || status === 'closed') {
     return (
-      <span style={pill("var(--green-soft)", "#065f46", "#6ee7b7")}>
+      <span style={pill('var(--green-soft)', '#065f46', '#6ee7b7')}>
         <DotInline color="#059669" /> {status}
       </span>
     );
   }
-  if (status === "in_progress") {
+  if (status === 'in_progress') {
     return (
-      <span style={pill("var(--amber-soft)", "#92400e", "#fcd34d")}>
+      <span style={pill('var(--amber-soft)', '#92400e', '#fcd34d')}>
         <DotInline color="#d97706" /> in progress
       </span>
     );
   }
   return (
-    <span style={pill("var(--brand-soft)", "#1e40af", "#bfdbfe")}>
-      <DotInline color="#2563eb" /> {status || "open"}
+    <span style={pill('var(--brand-soft)', '#1e40af', '#bfdbfe')}>
+      <DotInline color="#2563eb" /> {status || 'open'}
     </span>
   );
 }
 
 function pill(bg, color, border) {
   return {
-    display: "inline-flex",
-    alignItems: "center",
+    display: 'inline-flex',
+    alignItems: 'center',
     gap: 5,
-    padding: "3px 9px",
+    padding: '3px 9px',
     borderRadius: 999,
     background: bg,
     color,
@@ -572,9 +552,9 @@ function DotInline({ color }) {
       style={{
         width: 6,
         height: 6,
-        borderRadius: "50%",
+        borderRadius: '50%',
         background: color,
-        display: "inline-block",
+        display: 'inline-block',
       }}
     />
   );
@@ -595,14 +575,14 @@ function TrashIcon() {
 }
 
 function formatDate(value) {
-  if (!value) return "";
+  if (!value) return '';
   try {
     return new Date(value).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   } catch {
     return String(value);

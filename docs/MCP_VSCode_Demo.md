@@ -12,14 +12,14 @@ tools are available to:
 
 ## Tools exposed
 
-| Tool                      | Purpose                                                           |
-| ------------------------- | ----------------------------------------------------------------- |
-| `create_ticket`           | Open a ticket. Persisted to the shared SQLite store.              |
-| `list_tickets`            | List tickets, optionally filtered by category/status.             |
-| `update_ticket_status`    | open → in_progress → escalated → resolved.                        |
-| `update_ticket_priority`  | low / medium / high / critical.                                   |
-| `analyze_logs`            | Summarize one of the sample log files.                            |
-| `recent_errors`           | Most recent ERROR-level events across all sample log files.       |
+| Tool                     | Purpose                                                     |
+| ------------------------ | ----------------------------------------------------------- |
+| `create_ticket`          | Open a ticket. Persisted to the shared SQLite store.        |
+| `list_tickets`           | List tickets, optionally filtered by category/status.       |
+| `update_ticket_status`   | open → in_progress → escalated → resolved.                  |
+| `update_ticket_priority` | low / medium / high / critical.                             |
+| `analyze_logs`           | Summarize one of the sample log files.                      |
+| `recent_errors`          | Most recent ERROR-level events across all sample log files. |
 
 ## Run the MCP server
 

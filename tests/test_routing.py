@@ -533,7 +533,9 @@ def _summary_markdown(summary: dict) -> str:
     lines.append("")
     lines.append("## Per-scenario")
     lines.append("")
-    lines.append("| ID | Result | Final route | Trace | Ticket | Escalated | Automation |")
+    lines.append(
+        "| ID | Result | Final route | Trace | Ticket | Escalated | Automation |"
+    )
     lines.append("| --- | --- | --- | --- | --- | --- | --- |")
     for r in summary["results"]:
         a = r.get("actual", {})

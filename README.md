@@ -6,19 +6,24 @@ IT Ops API backed by SQLite, a sentence-transformers + ChromaDB knowledge
 base, and a real **Model Context Protocol** server that exposes the same
 ticketing/log tools to VS Code and Claude Desktop.
 
-## Repository tour 
+This is a capstone project. See the [docs/](docs/) folder for product,
+UX, MCP-proof, industry-comparison, validation, and presentation companions
+that map 1:1 to the eight grading checkpoints. A grader who only reads
+[`docs/PRESENTATION.md`](docs/PRESENTATION.md) will get the full picture.
 
-| Checkpoint                                | Where                                                                       |
-| ----------------------------------------- | --------------------------------------------------------------------------- |
-| 1. Problem definition & use case clarity  | [docs/PRODUCT.md](docs/PRODUCT.md), this README "Problem statement"         |
-| 2. Product ownership perspective          | [docs/PRODUCT.md](docs/PRODUCT.md) "Ownership", [docs/PRESENTATION.md](docs/PRESENTATION.md) |
-| 3. Agent architecture & role definition   | [diagrams/architecture.md](diagrams/architecture.md), this README "Agents"  |
-| 4. RAG integration & knowledge management | [docs/PRODUCT.md](docs/PRODUCT.md) "RAG", `backend/rag/`, `backend/data/kb/` |
-| 5. Workflow automation                    | `backend/agents/workflow_agent.py`, this README "Simulated automations"     |
-| 6. UX design & user experience            | [docs/UX.md](docs/UX.md), `frontend/src/`                                   |
-| 7. Technical implementation (incl. MCP)   | [docs/MCP_PROOF.md](docs/MCP_PROOF.md), `mcp_server/`                       |
-| 8. Validation & testing                   | [docs/VALIDATION.md](docs/VALIDATION.md), `tests/`                          |
-| Industry context                          | [docs/INDUSTRY_COMPARISON.md](docs/INDUSTRY_COMPARISON.md)                  |
+## Repository tour for graders
+
+| Checkpoint                                | Where                                                                                                                    |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 1. Problem definition & use case clarity  | [docs/PRODUCT.md](docs/PRODUCT.md), this README "Problem statement"                                                      |
+| 2. Product ownership perspective          | [docs/PRODUCT.md](docs/PRODUCT.md) "Ownership", [docs/PRESENTATION.md](docs/PRESENTATION.md)                             |
+| 3. Agent architecture & role definition   | [diagrams/architecture.md](diagrams/architecture.md), [diagrams/workflow.md](diagrams/workflow.md), this README "Agents" |
+| 4. RAG integration & knowledge management | [docs/PRODUCT.md](docs/PRODUCT.md) "RAG", `backend/rag/`, `backend/data/kb/`                                             |
+| 5. Workflow automation                    | `backend/agents/workflow_agent.py`, this README "Simulated automations"                                                  |
+| 6. UX design & user experience            | [docs/UX.md](docs/UX.md), [diagrams/wireframes.md](diagrams/wireframes.md), `frontend/src/`                              |
+| 7. Technical implementation (incl. MCP)   | [docs/MCP_PROOF.md](docs/MCP_PROOF.md), `mcp_server/`                                                                    |
+| 8. Validation & testing                   | [docs/VALIDATION.md](docs/VALIDATION.md), `tests/`                                                                       |
+| Industry context                          | [docs/INDUSTRY_COMPARISON.md](docs/INDUSTRY_COMPARISON.md)                                                               |
 
 ## Problem statement
 
@@ -38,14 +43,14 @@ The deterministic harness in `tests/test_routing.py` enforces all of these
 on every run; the live-LLM harness in `tests/test_accuracy.py` measures
 classification accuracy against Claude.
 
-| Axis                                               | Target | Measured by                                   |
-| -------------------------------------------------- | ------ | --------------------------------------------- |
-| Correct route trace                                | 100%   | `tests/test_routing.py` `route_trace` check   |
-| Correct ticket-creation decision                   | 100%   | `tests/test_routing.py` `should_create_ticket`|
-| Correct escalation decision                        | 100%   | `tests/test_routing.py` `escalated`           |
-| Correct automation status                          | 100%   | `tests/test_routing.py` `automation_status`   |
-| Category classification (live LLM, fuzzier signal) | ≥ 85%  | `tests/test_accuracy.py`                      |
-| MCP/HTTP cross-transport parity                    | 100%   | `tests/test_mcp_proof.py`                     |
+| Axis                                               | Target | Measured by                                    |
+| -------------------------------------------------- | ------ | ---------------------------------------------- |
+| Correct route trace                                | 100%   | `tests/test_routing.py` `route_trace` check    |
+| Correct ticket-creation decision                   | 100%   | `tests/test_routing.py` `should_create_ticket` |
+| Correct escalation decision                        | 100%   | `tests/test_routing.py` `escalated`            |
+| Correct automation status                          | 100%   | `tests/test_routing.py` `automation_status`    |
+| Category classification (live LLM, fuzzier signal) | ≥ 85%  | `tests/test_accuracy.py`                       |
+| MCP/HTTP cross-transport parity                    | 100%   | `tests/test_mcp_proof.py`                      |
 
 A current sample report is at `tests/results/latest-summary.md` (regenerated
 every time you run `make test`).
@@ -93,8 +98,11 @@ that MCP and HTTP land in the same database is in
   specific human-handoff message.
   Implemented in `backend/agents/escalation_agent.py`.
 
-See [`diagrams/architecture.md`](diagrams/architecture.md) for the full
-flow.
+See [`diagrams/architecture.md`](diagrams/architecture.md) for the
+static topology, [`diagrams/workflow.md`](diagrams/workflow.md) for
+sequence diagrams of every canonical user path, and
+[`diagrams/wireframes.md`](diagrams/wireframes.md) for the matching UI
+mockups.
 
 ## Conditional routing
 
@@ -128,14 +136,14 @@ completed.
 Example routes (every one of these is enforced by
 `tests/test_routing.py`):
 
-| Message                                          | Route                                                       |
-| ------------------------------------------------ | ----------------------------------------------------------- |
-| "How do I clear my browser cache?"               | intake → knowledge → final_response                         |
-| "I forgot my password and need a reset link."    | intake → knowledge → workflow → final_response              |
+| Message                                               | Route                                                       |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
+| "How do I clear my browser cache?"                    | intake → knowledge → final_response                         |
+| "I forgot my password and need a reset link."         | intake → knowledge → workflow → final_response              |
 | "VPN is down for the whole team and nobody can work." | intake → knowledge → workflow → escalation → final_response |
-| "Please create a ticket for my broken laptop screen." | intake → knowledge → workflow → final_response             |
-| "I tried that but it still didn't work."         | intake → knowledge → escalation → final_response            |
-| "Can you write me a poem about coffee?"          | intake → final_response                                     |
+| "Please create a ticket for my broken laptop screen." | intake → knowledge → workflow → final_response              |
+| "I tried that but it still didn't work."              | intake → knowledge → escalation → final_response            |
+| "Can you write me a poem about coffee?"               | intake → final_response                                     |
 
 Each `/chat` response includes the actual route trace, the ticket-decision
 reason, the automation status, and per-turn category/intent classification.
@@ -148,6 +156,31 @@ curl -s -X POST http://localhost:8000/chat \
   -H 'Content-Type: application/json' \
   -d '{"message":"I forgot my password","session_id":"demo"}' | jq .
 ```
+
+## Simulated automations (be honest about what's real)
+
+Most automations in this capstone are **stubs** that return canned success
+strings. They are tagged `automation_simulated: true` in the API response,
+their text is prefixed `[Simulated]`, and the chat UI surfaces a
+`Simulated automation` chip on every such turn. Two intents do call real
+subsystems:
+
+| Intent                   | Status    | What actually happens                                                   |
+| ------------------------ | --------- | ----------------------------------------------------------------------- |
+| `password_reset`         | Simulated | Returns a canned "[Simulated] Password reset link sent" message.        |
+| `account_unlock`         | Simulated | Returns a canned "[Simulated] Account unlock submitted" message.        |
+| `software_license_check` | Simulated | Returns a canned "[Simulated] License is active" message.               |
+| `software_install`       | Simulated | Returns a canned "[Simulated] Install request submitted" message.       |
+| `access_request`         | Simulated | Returns a canned "[Simulated] Access request submitted" message.        |
+| `vpn_log_check`          | **Real**  | Reads sample log files via the IT Ops API `/api/v1/logs/analyze` route. |
+| `status_check`           | **Real**  | Queries the actual ticket DB via the IT Ops API.                        |
+
+In a production deployment the simulated paths would call enterprise
+identity, asset-management, and access-management systems via their own
+adapters. The architecture treats automations as a list of pluggable
+intent handlers, so adding a real one is a localised change in
+`backend/agents/workflow_agent.py`.
+
 ## MCP integration
 
 The repo includes a real MCP server (`mcp_server/server.py`) built on
@@ -163,7 +196,7 @@ Both transports — the HTTP IT Ops API and the MCP server — read and write
 the same SQLite database (`services/it_ops_api/it_ops.db`). A ticket created
 from VS Code Copilot Chat shows up in the web Tickets page, and vice versa.
 
-Three layers to create MCP:
+Three layers of evidence for graders:
 
 1. **Code** — `mcp_server/store.py` shows the shared store helpers wrapped
    by both the FastMCP tools and the FastAPI ops API.
@@ -293,8 +326,14 @@ it-support-ai/
 │   ├── PRESENTATION.md
 │   ├── VALIDATION.md
 │   └── MCP_VSCode_Demo.md
-├── diagrams/architecture.md
-├── scripts/dev.sh
+├── diagrams/
+│   ├── architecture.md
+│   ├── workflow.md       # sequence diagrams for every routing path
+│   ├── wireframes.md     # ASCII UI mockups + cross-page flow
+│   └── rendered/         # pre-rendered SVGs of every mermaid block
+├── scripts/
+│   ├── dev.sh
+│   └── prepare-submission.sh
 ├── Makefile
 ├── pyproject.toml        # black + ruff config (target py311)
 ├── .python-version       # 3.11 (read by pyenv & Makefile)
@@ -302,6 +341,20 @@ it-support-ai/
 ├── requirements-dev.txt
 └── .env.example
 ```
+
+## Submission
+
+To produce a clean zip ready to upload (no `.env`, no `.venv`, no
+SQLite DBs, no caches, no macOS metadata):
+
+```bash
+make submission   # writes ./submission.zip
+```
+
+The script copies the working tree to a temp dir with rsync, refuses to
+proceed if a real-looking Anthropic API key is in the staged copy, then
+zips the result. It also re-runs `make test` so the bundled
+`tests/results/latest-summary.md` reflects the current pass state.
 
 ## Status
 

@@ -1,4 +1,4 @@
-.PHONY: help setup setup-dev dev backend ops mcp frontend ingest test test-llm test-mcp format lint clean
+.PHONY: help setup setup-dev dev backend ops mcp frontend ingest test test-llm test-mcp format lint clean submission
 
 # This project standardises on Python 3.11. The Makefile prefers `python3.11`
 # explicitly; override with `make setup PYTHON=python3` if you only have one
@@ -21,6 +21,7 @@ help:
 	@echo "  make test-mcp    Run the MCP cross-transport proof test"
 	@echo "  make format      Run black + prettier"
 	@echo "  make lint        Run ruff"
+	@echo "  make submission  Build a clean submission.zip (no .env, no .venv, no DBs)"
 	@echo "  make clean       Remove venv, node_modules, chroma_db, SQLite db"
 
 setup:
@@ -77,3 +78,6 @@ lint:
 
 clean:
 	rm -rf .venv chroma_db services/it_ops_api/it_ops.db services/it_ops_api/it_ops.db-* frontend/node_modules
+
+submission:
+	./scripts/prepare-submission.sh

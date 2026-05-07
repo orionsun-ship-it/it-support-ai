@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import useChat from "../hooks/useChat.js";
+import { useEffect, useRef, useState } from 'react';
+import useChat from '../hooks/useChat.js';
 
 export default function ChatPage({ sessionId }) {
-  const { messages, isLoading, sendMessage, submitFeedback, errorBanner } =
-    useChat(sessionId);
-  const [input, setInput] = useState("");
+  const { messages, isLoading, sendMessage, submitFeedback, errorBanner } = useChat(sessionId);
+  const [input, setInput] = useState('');
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -17,7 +16,7 @@ export default function ChatPage({ sessionId }) {
     e.preventDefault();
     if (isLoading || !input.trim()) return;
     const text = input;
-    setInput("");
+    setInput('');
     await sendMessage(text);
   };
 
@@ -26,9 +25,9 @@ export default function ChatPage({ sessionId }) {
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
       }}
     >
       <Header escalated={anyEscalated} />
@@ -39,39 +38,34 @@ export default function ChatPage({ sessionId }) {
         ref={scrollRef}
         style={{
           flex: 1,
-          overflowY: "auto",
-          padding: "32px 32px 8px",
+          overflowY: 'auto',
+          padding: '32px 32px 8px',
         }}
       >
         <div
           style={{
             maxWidth: 760,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
             gap: 20,
           }}
         >
           {messages.length === 0 && !isLoading && <EmptyState onPick={sendMessage} />}
 
           {messages.map((m) =>
-            m.role === "user" ? (
+            m.role === 'user' ? (
               <UserBubble key={m.id} message={m} />
             ) : (
               <AssistantBubble key={m.id} message={m} onFeedback={submitFeedback} />
-            )
+            ),
           )}
 
           {isLoading && <ThinkingIndicator />}
         </div>
       </div>
 
-      <Composer
-        input={input}
-        setInput={setInput}
-        onSubmit={onSubmit}
-        isLoading={isLoading}
-      />
+      <Composer input={input} setInput={setInput} onSubmit={onSubmit} isLoading={isLoading} />
     </div>
   );
 }
@@ -80,12 +74,12 @@ function Header({ escalated }) {
   return (
     <div
       style={{
-        padding: "20px 32px",
-        borderBottom: "1px solid var(--border)",
-        background: "var(--surface)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
+        padding: '20px 32px',
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--surface)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}
     >
       <div>
@@ -93,13 +87,13 @@ function Header({ escalated }) {
           style={{
             fontSize: 15,
             fontWeight: 600,
-            color: "var(--text)",
+            color: 'var(--text)',
             letterSpacing: -0.1,
           }}
         >
           Support assistant
         </div>
-        <div style={{ fontSize: 12.5, color: "var(--text-muted)", marginTop: 2 }}>
+        <div style={{ fontSize: 12.5, color: 'var(--text-muted)', marginTop: 2 }}>
           Ask about passwords, VPN, software errors, network, hardware, or access.
         </div>
       </div>
@@ -112,23 +106,23 @@ function Header({ escalated }) {
   );
 }
 
-function Banner({ kind = "warn", message }) {
+function Banner({ kind = 'warn', message }) {
   const style =
-    kind === "warn"
+    kind === 'warn'
       ? {
-          background: "var(--amber-soft)",
-          color: "#92400e",
-          borderColor: "#fcd34d",
+          background: 'var(--amber-soft)',
+          color: '#92400e',
+          borderColor: '#fcd34d',
         }
       : {
-          background: "var(--red-soft)",
-          color: "#991b1b",
-          borderColor: "#fca5a5",
+          background: 'var(--red-soft)',
+          color: '#991b1b',
+          borderColor: '#fca5a5',
         };
   return (
     <div
       style={{
-        padding: "10px 32px",
+        padding: '10px 32px',
         fontSize: 12.5,
         borderBottom: `1px solid ${style.borderColor}`,
         background: style.background,
@@ -142,20 +136,20 @@ function Banner({ kind = "warn", message }) {
 
 function EmptyState({ onPick }) {
   const samples = [
-    "I forgot my password and need to reset it.",
-    "How do I set up the company VPN?",
-    "Outlook will not open this morning.",
-    "Installer fails with error 1603.",
+    'I forgot my password and need to reset it.',
+    'How do I set up the company VPN?',
+    'Outlook will not open this morning.',
+    'Installer fails with error 1603.',
   ];
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
         gap: 24,
-        padding: "64px 16px 24px",
-        textAlign: "center",
+        padding: '64px 16px 24px',
+        textAlign: 'center',
       }}
     >
       <div
@@ -163,12 +157,11 @@ function EmptyState({ onPick }) {
           width: 56,
           height: 56,
           borderRadius: 14,
-          background:
-            "linear-gradient(135deg, var(--brand-soft) 0%, var(--teal-soft) 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "var(--shadow-sm)",
+          background: 'linear-gradient(135deg, var(--brand-soft) 0%, var(--teal-soft) 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: 'var(--shadow-sm)',
         }}
       >
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
@@ -186,7 +179,7 @@ function EmptyState({ onPick }) {
           style={{
             fontSize: 18,
             fontWeight: 600,
-            color: "var(--text)",
+            color: 'var(--text)',
             letterSpacing: -0.2,
           }}
         >
@@ -195,23 +188,22 @@ function EmptyState({ onPick }) {
         <div
           style={{
             fontSize: 13.5,
-            color: "var(--text-muted)",
+            color: 'var(--text-muted)',
             marginTop: 6,
             maxWidth: 460,
           }}
         >
-          Describe your IT issue in your own words. The assistant will search the
-          knowledge base, run safe automations when possible, and escalate to a
-          human when needed.
+          Describe your IT issue in your own words. The assistant will search the knowledge base,
+          run safe automations when possible, and escalate to a human when needed.
         </div>
       </div>
 
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
           gap: 10,
-          width: "100%",
+          width: '100%',
           maxWidth: 560,
         }}
       >
@@ -220,25 +212,25 @@ function EmptyState({ onPick }) {
             key={s}
             onClick={() => onPick(s)}
             style={{
-              textAlign: "left",
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-md)",
-              padding: "12px 14px",
-              color: "var(--text-secondary)",
+              textAlign: 'left',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              padding: '12px 14px',
+              color: 'var(--text-secondary)',
               fontSize: 13,
-              boxShadow: "var(--shadow-xs)",
-              transition: "all 120ms ease",
+              boxShadow: 'var(--shadow-xs)',
+              transition: 'all 120ms ease',
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.borderColor = "var(--brand)";
-              e.currentTarget.style.color = "var(--text)";
-              e.currentTarget.style.background = "var(--brand-soft)";
+              e.currentTarget.style.borderColor = 'var(--brand)';
+              e.currentTarget.style.color = 'var(--text)';
+              e.currentTarget.style.background = 'var(--brand-soft)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.borderColor = "var(--border)";
-              e.currentTarget.style.color = "var(--text-secondary)";
-              e.currentTarget.style.background = "var(--surface)";
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.background = 'var(--surface)';
             }}
           >
             {s}
@@ -251,18 +243,18 @@ function EmptyState({ onPick }) {
 
 function UserBubble({ message }) {
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
       <div
         style={{
-          maxWidth: "78%",
-          background: "var(--brand)",
-          color: "#ffffff",
-          padding: "11px 16px",
-          borderRadius: "14px 14px 4px 14px",
+          maxWidth: '78%',
+          background: 'var(--brand)',
+          color: '#ffffff',
+          padding: '11px 16px',
+          borderRadius: '14px 14px 4px 14px',
           fontSize: 14,
           lineHeight: 1.55,
-          whiteSpace: "pre-wrap",
-          boxShadow: "var(--shadow-xs)",
+          whiteSpace: 'pre-wrap',
+          boxShadow: 'var(--shadow-xs)',
         }}
       >
         {message.content}
@@ -273,13 +265,13 @@ function UserBubble({ message }) {
 
 function AssistantBubble({ message, onFeedback }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Avatar />
         <span
           style={{
             fontSize: 12.5,
-            color: "var(--text-secondary)",
+            color: 'var(--text-secondary)',
             fontWeight: 500,
           }}
         >
@@ -295,15 +287,15 @@ function AssistantBubble({ message, onFeedback }) {
 
       <div
         style={{
-          maxWidth: "84%",
-          background: "var(--surface)",
-          padding: "14px 18px",
-          borderRadius: "4px 14px 14px 14px",
-          border: "1px solid var(--border)",
+          maxWidth: '84%',
+          background: 'var(--surface)',
+          padding: '14px 18px',
+          borderRadius: '4px 14px 14px 14px',
+          border: '1px solid var(--border)',
           fontSize: 14,
           lineHeight: 1.6,
-          color: "var(--text)",
-          boxShadow: "var(--shadow-xs)",
+          color: 'var(--text)',
+          boxShadow: 'var(--shadow-xs)',
         }}
       >
         <MarkdownContent content={message.content} />
@@ -315,11 +307,11 @@ function AssistantBubble({ message, onFeedback }) {
 
       <div
         style={{
-          display: "flex",
+          display: 'flex',
           gap: 8,
           marginTop: 2,
-          alignItems: "center",
-          flexWrap: "wrap",
+          alignItems: 'center',
+          flexWrap: 'wrap',
         }}
       >
         {message.ticketId && (
@@ -337,7 +329,7 @@ function AssistantBubble({ message, onFeedback }) {
             <DotIcon /> Simulated automation
           </Chip>
         )}
-        {message.agentName !== "error" && onFeedback && (
+        {message.agentName !== 'error' && onFeedback && (
           <FeedbackButtons
             messageId={message.id}
             current={message.feedback}
@@ -359,22 +351,22 @@ function RouteTraceStrip({ message }) {
   return (
     <details
       style={{
-        maxWidth: "84%",
-        background: "var(--surface-soft)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "8px 12px",
+        maxWidth: '84%',
+        background: 'var(--surface-soft)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-md)',
+        padding: '8px 12px',
         fontSize: 11.5,
-        color: "var(--text-secondary)",
+        color: 'var(--text-secondary)',
       }}
     >
       <summary
         style={{
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
           gap: 8,
-          color: "var(--text-muted)",
+          color: 'var(--text-muted)',
           fontWeight: 500,
         }}
       >
@@ -383,8 +375,8 @@ function RouteTraceStrip({ message }) {
             fontSize: 10.5,
             fontWeight: 600,
             letterSpacing: 0.6,
-            textTransform: "uppercase",
-            color: "var(--text-muted)",
+            textTransform: 'uppercase',
+            color: 'var(--text-muted)',
           }}
         >
           Route trace
@@ -394,8 +386,8 @@ function RouteTraceStrip({ message }) {
       <div
         style={{
           marginTop: 8,
-          display: "grid",
-          gridTemplateColumns: "auto 1fr",
+          display: 'grid',
+          gridTemplateColumns: 'auto 1fr',
           rowGap: 4,
           columnGap: 12,
           fontSize: 11.5,
@@ -438,7 +430,7 @@ function RouteTraceStrip({ message }) {
             <DiagLabel>automation</DiagLabel>
             <DiagValue>
               {automationStatus}
-              {message.automationSimulated ? " · simulated" : ""}
+              {message.automationSimulated ? ' · simulated' : ''}
             </DiagValue>
           </>
         )}
@@ -451,30 +443,30 @@ function RouteTraceInline({ trace, expanded = false }) {
   return (
     <span
       style={{
-        display: "inline-flex",
-        flexWrap: "wrap",
+        display: 'inline-flex',
+        flexWrap: 'wrap',
         gap: 4,
-        alignItems: "center",
-        fontFamily: "var(--font-mono, monospace)",
+        alignItems: 'center',
+        fontFamily: 'var(--font-mono, monospace)',
       }}
     >
       {trace.map((node, idx) => (
-        <span key={idx} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+        <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
           <span
             className="mono"
             style={{
               fontSize: 11,
-              padding: "1px 6px",
+              padding: '1px 6px',
               borderRadius: 4,
-              background: expanded ? "var(--surface)" : "#eef2f7",
-              color: "var(--text-secondary)",
-              border: "1px solid var(--border)",
+              background: expanded ? 'var(--surface)' : '#eef2f7',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
             }}
           >
             {node}
           </span>
           {idx < trace.length - 1 && (
-            <span style={{ color: "var(--text-faint)", fontSize: 11 }}>→</span>
+            <span style={{ color: 'var(--text-faint)', fontSize: 11 }}>→</span>
           )}
         </span>
       ))}
@@ -486,12 +478,12 @@ function DiagLabel({ children }) {
   return (
     <span
       style={{
-        color: "var(--text-muted)",
+        color: 'var(--text-muted)',
         fontSize: 10.5,
         fontWeight: 600,
         letterSpacing: 0.5,
-        textTransform: "uppercase",
-        whiteSpace: "nowrap",
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
       }}
     >
       {children}
@@ -501,7 +493,7 @@ function DiagLabel({ children }) {
 
 function DiagValue({ children }) {
   return (
-    <span className="mono" style={{ fontSize: 11.5, color: "var(--text)" }}>
+    <span className="mono" style={{ fontSize: 11.5, color: 'var(--text)' }}>
       {children}
     </span>
   );
@@ -509,37 +501,37 @@ function DiagValue({ children }) {
 
 function FeedbackButtons({ messageId, current, onFeedback }) {
   const baseStyle = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     width: 26,
     height: 26,
-    background: "transparent",
-    border: "1px solid var(--border)",
+    background: 'transparent',
+    border: '1px solid var(--border)',
     borderRadius: 6,
-    cursor: "pointer",
-    color: "var(--text-muted)",
-    transition: "all 120ms ease",
+    cursor: 'pointer',
+    color: 'var(--text-muted)',
+    transition: 'all 120ms ease',
   };
   const activeUp = {
-    background: "var(--green-soft)",
-    borderColor: "#6ee7b7",
-    color: "#047857",
+    background: 'var(--green-soft)',
+    borderColor: '#6ee7b7',
+    color: '#047857',
   };
   const activeDown = {
-    background: "var(--red-soft)",
-    borderColor: "#fca5a5",
-    color: "#b91c1c",
+    background: 'var(--red-soft)',
+    borderColor: '#fca5a5',
+    color: '#b91c1c',
   };
   return (
-    <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
+    <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
       <button
         type="button"
         aria-label="Helpful"
         title="Helpful"
-        onClick={() => onFeedback(messageId, "up")}
-        disabled={current === "up"}
-        style={{ ...baseStyle, ...(current === "up" ? activeUp : {}) }}
+        onClick={() => onFeedback(messageId, 'up')}
+        disabled={current === 'up'}
+        style={{ ...baseStyle, ...(current === 'up' ? activeUp : {}) }}
       >
         <ThumbsUp />
       </button>
@@ -547,9 +539,9 @@ function FeedbackButtons({ messageId, current, onFeedback }) {
         type="button"
         aria-label="Not helpful"
         title="Not helpful"
-        onClick={() => onFeedback(messageId, "down")}
-        disabled={current === "down"}
-        style={{ ...baseStyle, ...(current === "down" ? activeDown : {}) }}
+        onClick={() => onFeedback(messageId, 'down')}
+        disabled={current === 'down'}
+        style={{ ...baseStyle, ...(current === 'down' ? activeDown : {}) }}
       >
         <ThumbsDown />
       </button>
@@ -587,15 +579,15 @@ function Sources({ sources }) {
   return (
     <div
       style={{
-        maxWidth: "84%",
-        background: "var(--surface-soft)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "10px 14px",
+        maxWidth: '84%',
+        background: 'var(--surface-soft)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-md)',
+        padding: '10px 14px',
         fontSize: 12.5,
-        color: "var(--text-secondary)",
-        display: "flex",
-        flexDirection: "column",
+        color: 'var(--text-secondary)',
+        display: 'flex',
+        flexDirection: 'column',
         gap: 6,
       }}
     >
@@ -603,9 +595,9 @@ function Sources({ sources }) {
         style={{
           fontSize: 10.5,
           fontWeight: 600,
-          color: "var(--text-muted)",
+          color: 'var(--text-muted)',
           letterSpacing: 0.6,
-          textTransform: "uppercase",
+          textTransform: 'uppercase',
         }}
       >
         Sources
@@ -613,12 +605,12 @@ function Sources({ sources }) {
       {sources.map((s) => (
         <div
           key={s.chunk_id || s.doc_id}
-          style={{ display: "flex", gap: 10, alignItems: "center" }}
+          style={{ display: 'flex', gap: 10, alignItems: 'center' }}
         >
           <span
             className="mono"
             style={{
-              color: "var(--text)",
+              color: 'var(--text)',
               minWidth: 64,
               fontSize: 11.5,
               fontWeight: 500,
@@ -626,7 +618,7 @@ function Sources({ sources }) {
           >
             {s.doc_id}
           </span>
-          <span style={{ flex: 1, color: "var(--text-secondary)" }}>{s.title}</span>
+          <span style={{ flex: 1, color: 'var(--text-secondary)' }}>{s.title}</span>
         </div>
       ))}
     </div>
@@ -642,38 +634,38 @@ function inlineMarkdown(text, key = 0) {
   let m;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) segments.push(text.slice(last, m.index));
-    if (m[2] !== undefined)
-      segments.push(<strong key={m.index}>{m[2]}</strong>);
-    else if (m[3] !== undefined)
-      segments.push(<em key={m.index}>{m[3]}</em>);
+    if (m[2] !== undefined) segments.push(<strong key={m.index}>{m[2]}</strong>);
+    else if (m[3] !== undefined) segments.push(<em key={m.index}>{m[3]}</em>);
     else if (m[4] !== undefined)
       segments.push(
         <code
           key={m.index}
           style={{
-            background: "var(--surface-soft)",
-            border: "1px solid var(--border)",
+            background: 'var(--surface-soft)',
+            border: '1px solid var(--border)',
             borderRadius: 4,
-            padding: "1px 5px",
-            fontSize: "0.88em",
-            fontFamily: "monospace",
+            padding: '1px 5px',
+            fontSize: '0.88em',
+            fontFamily: 'monospace',
           }}
         >
           {m[4]}
-        </code>
+        </code>,
       );
     last = m.index + m[0].length;
   }
   if (last < text.length) segments.push(text.slice(last));
-  return segments.length === 0
-    ? ""
-    : segments.length === 1 && typeof segments[0] === "string"
-    ? segments[0]
-    : <span key={key}>{segments}</span>;
+  return segments.length === 0 ? (
+    ''
+  ) : segments.length === 1 && typeof segments[0] === 'string' ? (
+    segments[0]
+  ) : (
+    <span key={key}>{segments}</span>
+  );
 }
 
 function MarkdownContent({ content }) {
-  const lines = (content || "").split("\n");
+  const lines = (content || '').split('\n');
   const nodes = [];
   let i = 0;
 
@@ -683,7 +675,7 @@ function MarkdownContent({ content }) {
 
     if (/^#{1,3}\s/.test(stripped)) {
       const level = stripped.match(/^(#{1,3})/)[1].length;
-      const text = stripped.replace(/^#{1,3}\s+/, "");
+      const text = stripped.replace(/^#{1,3}\s+/, '');
       nodes.push(
         <div
           key={i}
@@ -692,38 +684,38 @@ function MarkdownContent({ content }) {
             fontSize: level === 1 ? 16 : level === 2 ? 15 : 14,
             marginTop: nodes.length ? 10 : 0,
             marginBottom: 2,
-            color: "var(--text)",
+            color: 'var(--text)',
           }}
         >
           {inlineMarkdown(text, i)}
-        </div>
+        </div>,
       );
     } else if (/^[-*•]\s/.test(stripped)) {
       nodes.push(
-        <div key={i} style={{ display: "flex", gap: 8, paddingLeft: 8 }}>
-          <span style={{ color: "var(--text-muted)", flexShrink: 0, marginTop: 1 }}>•</span>
-          <span>{inlineMarkdown(stripped.replace(/^[-*•]\s+/, ""), i)}</span>
-        </div>
+        <div key={i} style={{ display: 'flex', gap: 8, paddingLeft: 8 }}>
+          <span style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 1 }}>•</span>
+          <span>{inlineMarkdown(stripped.replace(/^[-*•]\s+/, ''), i)}</span>
+        </div>,
       );
     } else if (/^\d+\.\s/.test(stripped)) {
       const num = stripped.match(/^(\d+)\./)[1];
       nodes.push(
-        <div key={i} style={{ display: "flex", gap: 8, paddingLeft: 8 }}>
+        <div key={i} style={{ display: 'flex', gap: 8, paddingLeft: 8 }}>
           <span
             style={{
-              color: "var(--text-muted)",
+              color: 'var(--text-muted)',
               flexShrink: 0,
               minWidth: 18,
-              textAlign: "right",
+              textAlign: 'right',
               marginTop: 1,
             }}
           >
             {num}.
           </span>
-          <span>{inlineMarkdown(stripped.replace(/^\d+\.\s+/, ""), i)}</span>
-        </div>
+          <span>{inlineMarkdown(stripped.replace(/^\d+\.\s+/, ''), i)}</span>
+        </div>,
       );
-    } else if (stripped === "") {
+    } else if (stripped === '') {
       if (nodes.length && nodes[nodes.length - 1]?.key !== `gap-${i - 1}`) {
         nodes.push(<div key={`gap-${i}`} style={{ height: 6 }} />);
       }
@@ -733,26 +725,22 @@ function MarkdownContent({ content }) {
     i++;
   }
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      {nodes}
-    </div>
-  );
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{nodes}</div>;
 }
 
 function ThinkingIndicator() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, paddingLeft: 4 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingLeft: 4 }}>
       <Avatar />
       <div
         style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: "4px 14px 14px 14px",
-          padding: "10px 14px",
-          display: "flex",
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: '4px 14px 14px 14px',
+          padding: '10px 14px',
+          display: 'flex',
           gap: 4,
-          boxShadow: "var(--shadow-xs)",
+          boxShadow: 'var(--shadow-xs)',
         }}
       >
         <Dot delay={0} />
@@ -775,10 +763,10 @@ function Dot({ delay }) {
       style={{
         width: 6,
         height: 6,
-        borderRadius: "50%",
-        background: "var(--text-faint)",
+        borderRadius: '50%',
+        background: 'var(--text-faint)',
         animation: `pulseDot 1.2s ${delay}ms ease-in-out infinite`,
-        display: "inline-block",
+        display: 'inline-block',
       }}
     />
   );
@@ -791,11 +779,11 @@ function Avatar() {
         width: 24,
         height: 24,
         borderRadius: 7,
-        background: "linear-gradient(135deg, #3b82f6 0%, #0d9488 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.15)",
+        background: 'linear-gradient(135deg, #3b82f6 0%, #0d9488 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.15)',
       }}
     >
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -815,23 +803,23 @@ function Composer({ input, setInput, onSubmit, isLoading }) {
     <form
       onSubmit={onSubmit}
       style={{
-        padding: "16px 32px 24px",
-        background: "var(--bg)",
-        borderTop: "1px solid var(--border)",
+        padding: '16px 32px 24px',
+        background: 'var(--bg)',
+        borderTop: '1px solid var(--border)',
       }}
     >
       <div
         style={{
           maxWidth: 760,
-          margin: "0 auto",
-          display: "flex",
+          margin: '0 auto',
+          display: 'flex',
           gap: 8,
-          alignItems: "stretch",
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
+          alignItems: 'stretch',
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
           borderRadius: 12,
           padding: 6,
-          boxShadow: "var(--shadow-sm)",
+          boxShadow: 'var(--shadow-sm)',
         }}
       >
         <input
@@ -842,41 +830,38 @@ function Composer({ input, setInput, onSubmit, isLoading }) {
           disabled={isLoading}
           style={{
             flex: 1,
-            padding: "10px 12px",
-            border: "none",
-            outline: "none",
-            background: "transparent",
+            padding: '10px 12px',
+            border: 'none',
+            outline: 'none',
+            background: 'transparent',
             fontSize: 14,
-            color: "var(--text)",
+            color: 'var(--text)',
           }}
         />
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
           style={{
-            padding: "8px 16px",
-            background:
-              isLoading || !input.trim() ? "#cbd5e1" : "var(--brand)",
-            color: "#ffffff",
-            border: "none",
+            padding: '8px 16px',
+            background: isLoading || !input.trim() ? '#cbd5e1' : 'var(--brand)',
+            color: '#ffffff',
+            border: 'none',
             borderRadius: 8,
             fontSize: 13,
             fontWeight: 600,
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             gap: 6,
-            transition: "background 120ms ease",
+            transition: 'background 120ms ease',
           }}
           onMouseOver={(e) => {
-            if (!isLoading && input.trim())
-              e.currentTarget.style.background = "var(--brand-hover)";
+            if (!isLoading && input.trim()) e.currentTarget.style.background = 'var(--brand-hover)';
           }}
           onMouseOut={(e) => {
-            if (!isLoading && input.trim())
-              e.currentTarget.style.background = "var(--brand)";
+            if (!isLoading && input.trim()) e.currentTarget.style.background = 'var(--brand)';
           }}
         >
-          {isLoading ? "Sending…" : "Send"}
+          {isLoading ? 'Sending…' : 'Send'}
           {!isLoading && (
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <path
@@ -893,14 +878,13 @@ function Composer({ input, setInput, onSubmit, isLoading }) {
       <div
         style={{
           maxWidth: 760,
-          margin: "8px auto 0",
+          margin: '8px auto 0',
           fontSize: 11.5,
-          color: "var(--text-muted)",
-          textAlign: "center",
+          color: 'var(--text-muted)',
+          textAlign: 'center',
         }}
       >
-        The assistant uses your KB + Claude. Tickets are only opened for unresolved
-        issues.
+        The assistant uses your KB + Claude. Tickets are only opened for unresolved issues.
       </div>
     </form>
   );
@@ -909,34 +893,34 @@ function Composer({ input, setInput, onSubmit, isLoading }) {
 // ---------- shared chip + glyph ----------
 
 function chipKindForMatch(strength) {
-  if (strength === "strong") return "teal";
-  if (strength === "weak") return "amber";
-  return "neutral";
+  if (strength === 'strong') return 'teal';
+  if (strength === 'weak') return 'amber';
+  return 'neutral';
 }
 
-function Chip({ kind = "neutral", children }) {
+function Chip({ kind = 'neutral', children }) {
   const palette = {
-    teal: { bg: "var(--teal-soft)", color: "#115e59", border: "#5eead4" },
-    amber: { bg: "var(--amber-soft)", color: "#92400e", border: "#fcd34d" },
-    red: { bg: "var(--red-soft)", color: "#991b1b", border: "#fca5a5" },
-    blue: { bg: "var(--brand-soft)", color: "#1e40af", border: "#bfdbfe" },
-    green: { bg: "var(--green-soft)", color: "#065f46", border: "#6ee7b7" },
-    neutral: { bg: "#f1f5f9", color: "#334155", border: "#cbd5e1" },
+    teal: { bg: 'var(--teal-soft)', color: '#115e59', border: '#5eead4' },
+    amber: { bg: 'var(--amber-soft)', color: '#92400e', border: '#fcd34d' },
+    red: { bg: 'var(--red-soft)', color: '#991b1b', border: '#fca5a5' },
+    blue: { bg: 'var(--brand-soft)', color: '#1e40af', border: '#bfdbfe' },
+    green: { bg: 'var(--green-soft)', color: '#065f46', border: '#6ee7b7' },
+    neutral: { bg: '#f1f5f9', color: '#334155', border: '#cbd5e1' },
   }[kind];
   return (
     <span
       style={{
-        display: "inline-flex",
-        alignItems: "center",
+        display: 'inline-flex',
+        alignItems: 'center',
         gap: 5,
-        padding: "3px 9px",
+        padding: '3px 9px',
         borderRadius: 999,
         background: palette.bg,
         color: palette.color,
         border: `1px solid ${palette.border}`,
         fontSize: 11.5,
         fontWeight: 500,
-        whiteSpace: "nowrap",
+        whiteSpace: 'nowrap',
       }}
     >
       {children}
@@ -950,8 +934,8 @@ function DotIcon() {
       style={{
         width: 6,
         height: 6,
-        borderRadius: "50%",
-        background: "currentColor",
+        borderRadius: '50%',
+        background: 'currentColor',
         opacity: 0.85,
       }}
     />
@@ -970,4 +954,3 @@ function TicketGlyph() {
     </svg>
   );
 }
-

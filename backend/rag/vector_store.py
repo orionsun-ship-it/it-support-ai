@@ -67,7 +67,9 @@ class VectorStore:
             path=settings.chroma_db_path,
             settings=ChromaSettings(anonymized_telemetry=False),
         )
-        self.collection = self.client.get_or_create_collection(name=self.collection_name)
+        self.collection = self.client.get_or_create_collection(
+            name=self.collection_name
+        )
         logger.info(
             "ChromaDB ready: path=%s collection=%s count=%d",
             settings.chroma_db_path,

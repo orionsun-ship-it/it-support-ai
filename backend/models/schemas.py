@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -63,19 +63,19 @@ class AgentResponse(BaseModel):
     agent_name: str
     content: str
     confidence: float = Field(ge=0.0, le=1.0)
-    severity: Optional[Severity] = None
-    urgency: Optional[Urgency] = None
-    category: Optional[str] = None
-    intent: Optional[str] = None
-    action_taken: Optional[str] = None
-    ticket_id: Optional[str] = None
+    severity: Severity | None = None
+    urgency: Urgency | None = None
+    category: str | None = None
+    intent: str | None = None
+    action_taken: str | None = None
+    ticket_id: str | None = None
     escalated: bool = False
-    match_strength: Optional[Literal["strong", "weak", "none"]] = None
-    sources: List[KBSource] = Field(default_factory=list)
-    route_trace: List[str] = Field(default_factory=list)
-    final_route: Optional[str] = None
-    ticket_decision_reason: Optional[str] = None
-    automation_status: Optional[str] = None
+    match_strength: Literal["strong", "weak", "none"] | None = None
+    sources: list[KBSource] = Field(default_factory=list)
+    route_trace: list[str] = Field(default_factory=list)
+    final_route: str | None = None
+    ticket_decision_reason: str | None = None
+    automation_status: str | None = None
     automation_simulated: bool = False
 
 
@@ -97,7 +97,7 @@ class TicketResponse(TicketCreate):
     ticket_id: str
     status: str
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
 
 class ConversationTurn(BaseModel):
@@ -105,17 +105,17 @@ class ConversationTurn(BaseModel):
 
     role: Literal["user", "assistant"]
     content: str
-    agent_name: Optional[str] = None
-    ticket_id: Optional[str] = None
+    agent_name: str | None = None
+    ticket_id: str | None = None
     escalated: bool = False
-    sources: List[KBSource] = Field(default_factory=list)
+    sources: list[KBSource] = Field(default_factory=list)
     timestamp: datetime = Field(default_factory=datetime.now)
 
 
 class SessionState(BaseModel):
     session_id: str
-    history: List[ConversationTurn] = Field(default_factory=list)
-    current_ticket: Optional[TicketResponse] = None
+    history: list[ConversationTurn] = Field(default_factory=list)
+    current_ticket: TicketResponse | None = None
     escalated: bool = False
 
 

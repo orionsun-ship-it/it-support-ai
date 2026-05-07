@@ -7,20 +7,19 @@ so both transports (HTTP and MCP/stdio) end up in the same database file.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
-from sqlmodel import select
+from sqlmodel import Session, select
 
 from services.it_ops_api.db import engine, init_db
 from services.it_ops_api.log_analyzer import analyze_logs as _analyze_logs
 from services.it_ops_api.log_analyzer import get_recent_errors as _get_recent_errors
 from services.it_ops_api.models import AuditLog, Ticket, TicketEvent
-from sqlmodel import Session
 
 
 def _utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def create_ticket(payload: dict[str, Any]) -> dict[str, Any]:

@@ -31,15 +31,7 @@ Escalation triggers:
 from __future__ import annotations
 
 import time
-from typing import Any, List, Literal, TypedDict
-
-_STUCK_PHRASES = (
-    "still not working", "still broken", "didn't work", "did not work",
-    "doesn't work", "does not work", "no luck", "still the same",
-    "same issue", "same problem", "same error", "still happening",
-    "not fixed", "still stuck", "tried that", "already tried",
-    "not resolved", "not solved", "still failing",
-)
+from typing import Any, Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
@@ -50,6 +42,28 @@ from backend.agents.workflow_agent import WorkflowAgent
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
+_STUCK_PHRASES = (
+    "still not working",
+    "still broken",
+    "didn't work",
+    "did not work",
+    "doesn't work",
+    "does not work",
+    "no luck",
+    "still the same",
+    "same issue",
+    "same problem",
+    "same error",
+    "still happening",
+    "not fixed",
+    "still stuck",
+    "tried that",
+    "already tried",
+    "not resolved",
+    "not solved",
+    "still failing",
+)
 
 
 class AgentState(TypedDict, total=False):
@@ -65,18 +79,20 @@ class AgentState(TypedDict, total=False):
     requires_automation: bool
     context: str | None
     match_strength: Literal["strong", "weak", "none"] | None
-    sources: List[dict]
+    sources: list[dict]
     response: str | None
     ticket: dict | None
     should_create_ticket: bool
     ticket_decision_reason: str | None
-    automation_status: Literal["not_needed", "success", "failed", "manual_required"] | None
+    automation_status: (
+        Literal["not_needed", "success", "failed", "manual_required"] | None
+    )
     automation_result: str | None
     automation_simulated: bool
     ops_api_unavailable: bool
     escalated: bool
     response_time_ms: float
-    route_trace: List[str]
+    route_trace: list[str]
     final_route: str | None
 
 
@@ -114,7 +130,10 @@ def _user_is_stuck(state: AgentState) -> bool:
     user_msg = (state.get("user_message") or "").lower()
 
     # Explicit escalation / human request is always honoured.
-    if any(w in user_msg for w in ("escalate", "human agent", "real person", "speak to someone")):
+    if any(
+        w in user_msg
+        for w in ("escalate", "human agent", "real person", "speak to someone")
+    ):
         return True
 
     # Only consider "still stuck" signals when there's at least one prior exchange.

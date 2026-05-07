@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable
 
 from backend.config import get_settings
 from backend.rag.vector_store import VectorStore
@@ -47,8 +47,7 @@ def _hash(text: str) -> str:
 
 
 def _iter_kb_files(kb_dir: Path) -> Iterable[Path]:
-    for p in sorted(kb_dir.glob("*.json")):
-        yield p
+    yield from sorted(kb_dir.glob("*.json"))
 
 
 def _load_documents(kb_dir: Path) -> list[dict]:

@@ -89,24 +89,42 @@ Excerpt:
   "ticket_id": "TKT-2817C693",
   "passed": true,
   "steps": [
-    {"step": "mcp_create_ticket", "ok": true, "via": "mcp_server.store.create_ticket"},
-    {"step": "http_get_returns_same_ticket", "ok": true, "status_code": 200, "ticket_id_match": true},
-    {"step": "mcp_update_visible_via_http", "ok": true, "mcp_status_after_update": "escalated", "http_status_after_update": "escalated"},
-    {"step": "mcp_list_sees_same_row", "ok": true, "found_status": "escalated"},
-    {"step": "http_list_sees_same_row", "ok": true}
+    {
+      "step": "mcp_create_ticket",
+      "ok": true,
+      "via": "mcp_server.store.create_ticket"
+    },
+    {
+      "step": "http_get_returns_same_ticket",
+      "ok": true,
+      "status_code": 200,
+      "ticket_id_match": true
+    },
+    {
+      "step": "mcp_update_visible_via_http",
+      "ok": true,
+      "mcp_status_after_update": "escalated",
+      "http_status_after_update": "escalated"
+    },
+    {
+      "step": "mcp_list_sees_same_row",
+      "ok": true,
+      "found_status": "escalated"
+    },
+    { "step": "http_list_sees_same_row", "ok": true }
   ]
 }
 ```
 
 Interpretation:
 
-| Step                              | What it proves                                                |
-| --------------------------------- | ------------------------------------------------------------- |
-| `mcp_create_ticket`               | The MCP transport can write tickets.                          |
-| `http_get_returns_same_ticket`    | The HTTP transport sees what MCP wrote (same DB, same row).   |
-| `mcp_update_visible_via_http`     | A mutation on the MCP side is observable on the HTTP side.    |
-| `mcp_list_sees_same_row`          | The MCP listing endpoint returns the row with the new status. |
-| `http_list_sees_same_row`         | Same for HTTP listing — both transports stay in sync.         |
+| Step                           | What it proves                                                |
+| ------------------------------ | ------------------------------------------------------------- |
+| `mcp_create_ticket`            | The MCP transport can write tickets.                          |
+| `http_get_returns_same_ticket` | The HTTP transport sees what MCP wrote (same DB, same row).   |
+| `mcp_update_visible_via_http`  | A mutation on the MCP side is observable on the HTTP side.    |
+| `mcp_list_sees_same_row`       | The MCP listing endpoint returns the row with the new status. |
+| `http_list_sees_same_row`      | Same for HTTP listing — both transports stay in sync.         |
 
 Five steps, five passes, deterministic. No mocks of the persistence
 layer — the SQLModel session is real, the DB file is real (just isolated

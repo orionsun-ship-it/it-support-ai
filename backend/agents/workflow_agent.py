@@ -185,7 +185,10 @@ class WorkflowAgent:
         state["automation_result"] = None
         state["automation_simulated"] = False
 
-        if state.get("requires_automation") and state.get("intent") in AUTOMATABLE_INTENTS:
+        if (
+            state.get("requires_automation")
+            and state.get("intent") in AUTOMATABLE_INTENTS
+        ):
             status, message = self._run_automation(state)
             state["automation_status"] = status
             state["automation_result"] = message or None

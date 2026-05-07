@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 class Embedder:
     """Lazy-loaded embedding model. Use Embedder.shared() to reuse a singleton."""
 
-    _instance: "Embedder | None" = None
+    _instance: Embedder | None = None
 
     def __init__(self) -> None:
         settings = get_settings()
@@ -30,7 +30,7 @@ class Embedder:
             ) from exc
 
     @classmethod
-    def shared(cls) -> "Embedder":
+    def shared(cls) -> Embedder:
         """Return a process-wide singleton — the model is heavy to load."""
         if cls._instance is None:
             cls._instance = cls()

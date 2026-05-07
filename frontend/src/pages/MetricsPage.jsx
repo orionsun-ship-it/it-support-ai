@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export default function MetricsPage() {
   const [metrics, setMetrics] = useState(null);
@@ -9,7 +9,7 @@ export default function MetricsPage() {
     setLoading(true);
     setError(null);
     try {
-      const resp = await fetch("/api/metrics");
+      const resp = await fetch('/api/metrics');
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       setMetrics(await resp.json());
     } catch (err) {
@@ -24,12 +24,12 @@ export default function MetricsPage() {
   }, []);
 
   return (
-    <div style={{ padding: "32px 32px 40px", maxWidth: 1180, margin: "0 auto" }}>
+    <div style={{ padding: '32px 32px 40px', maxWidth: 1180, margin: '0 auto' }}>
       <div
         style={{
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
         }}
       >
         <div>
@@ -38,13 +38,13 @@ export default function MetricsPage() {
               margin: 0,
               fontSize: 22,
               fontWeight: 600,
-              color: "var(--text)",
+              color: 'var(--text)',
               letterSpacing: -0.3,
             }}
           >
             System metrics
           </h2>
-          <div style={{ marginTop: 4, color: "var(--text-muted)", fontSize: 13.5 }}>
+          <div style={{ marginTop: 4, color: 'var(--text-muted)', fontSize: 13.5 }}>
             Live snapshot of the assistant pipeline and dependencies.
           </div>
         </div>
@@ -53,20 +53,20 @@ export default function MetricsPage() {
           onClick={refresh}
           disabled={loading}
           style={{
-            padding: "8px 14px",
-            background: "var(--surface)",
-            color: "var(--text)",
-            border: "1px solid var(--border-strong)",
+            padding: '8px 14px',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            border: '1px solid var(--border-strong)',
             borderRadius: 8,
             fontSize: 13,
             fontWeight: 500,
-            boxShadow: "var(--shadow-xs)",
-            display: "inline-flex",
-            alignItems: "center",
+            boxShadow: 'var(--shadow-xs)',
+            display: 'inline-flex',
+            alignItems: 'center',
             gap: 6,
           }}
         >
-          {loading ? "Refreshing…" : "Refresh"}
+          {loading ? 'Refreshing…' : 'Refresh'}
         </button>
       </div>
 
@@ -74,11 +74,11 @@ export default function MetricsPage() {
         <div
           style={{
             marginTop: 20,
-            background: "var(--red-soft)",
-            color: "#991b1b",
+            background: 'var(--red-soft)',
+            color: '#991b1b',
             padding: 16,
-            borderRadius: "var(--radius-md)",
-            border: "1px solid #fca5a5",
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid #fca5a5',
             fontSize: 13,
           }}
         >
@@ -90,8 +90,8 @@ export default function MetricsPage() {
         <div
           style={{
             marginTop: 24,
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
             gap: 14,
           }}
         >
@@ -104,13 +104,9 @@ export default function MetricsPage() {
           <Card
             label="Avg response time"
             value={`${(metrics.avg_response_time_ms || 0).toFixed(0)} ms`}
-            accent={metrics.avg_response_time_ms > 3000 ? "amber" : "teal"}
+            accent={metrics.avg_response_time_ms > 3000 ? 'amber' : 'teal'}
             icon={<ClockGlyph />}
-            sub={
-              metrics.avg_response_time_ms > 3000
-                ? "Above 3s target"
-                : "Within target"
-            }
+            sub={metrics.avg_response_time_ms > 3000 ? 'Above 3s target' : 'Within target'}
           />
           <Card
             label="Total tickets"
@@ -121,48 +117,44 @@ export default function MetricsPage() {
           <Card
             label="Escalations"
             value={metrics.total_escalations}
-            accent={metrics.total_escalations > 0 ? "red" : "neutral"}
+            accent={metrics.total_escalations > 0 ? 'red' : 'neutral'}
             icon={<AlertGlyph />}
-            sub={
-              metrics.total_escalations > 0
-                ? "Active human handoffs"
-                : "No escalations"
-            }
+            sub={metrics.total_escalations > 0 ? 'Active human handoffs' : 'No escalations'}
           />
           <Card
             label="Knowledge base"
-            value={metrics.kb_seeded ? "Seeded" : "Not seeded"}
-            accent={metrics.kb_seeded ? "green" : "red"}
+            value={metrics.kb_seeded ? 'Seeded' : 'Not seeded'}
+            accent={metrics.kb_seeded ? 'green' : 'red'}
             icon={<DbGlyph />}
-            sub={metrics.kb_seeded ? "Ready for retrieval" : "Run make ingest"}
+            sub={metrics.kb_seeded ? 'Ready for retrieval' : 'Run make ingest'}
           />
           <Card
             label="System uptime"
             value={formatUptime(metrics.uptime_seconds)}
             accent="neutral"
             icon={<HeartGlyph />}
-            sub={metrics.ops_api_available ? "Ops API healthy" : "Ops API unreachable"}
+            sub={metrics.ops_api_available ? 'Ops API healthy' : 'Ops API unreachable'}
           />
           <Card
             label="User satisfaction"
             value={
               (metrics.feedback_total || 0) === 0
-                ? "—"
+                ? '—'
                 : `${Math.round((metrics.satisfaction_score || 0) * 100)}%`
             }
             accent={
               (metrics.feedback_total || 0) === 0
-                ? "neutral"
+                ? 'neutral'
                 : (metrics.satisfaction_score || 0) >= 0.7
-                ? "green"
-                : (metrics.satisfaction_score || 0) >= 0.4
-                ? "amber"
-                : "red"
+                  ? 'green'
+                  : (metrics.satisfaction_score || 0) >= 0.4
+                    ? 'amber'
+                    : 'red'
             }
             icon={<ThumbGlyph />}
             sub={
               (metrics.feedback_total || 0) === 0
-                ? "No feedback yet"
+                ? 'No feedback yet'
                 : `${metrics.feedback_up || 0} up · ${metrics.feedback_down || 0} down`
             }
           />
@@ -172,34 +164,34 @@ export default function MetricsPage() {
   );
 }
 
-function Card({ label, value, accent = "brand", icon, sub }) {
+function Card({ label, value, accent = 'brand', icon, sub }) {
   const accents = {
-    brand: { bar: "var(--brand)", iconBg: "var(--brand-soft)", iconColor: "#2563eb" },
-    teal: { bar: "var(--teal)", iconBg: "var(--teal-soft)", iconColor: "#0f766e" },
-    amber: { bar: "var(--amber)", iconBg: "var(--amber-soft)", iconColor: "#b45309" },
-    red: { bar: "var(--red)", iconBg: "var(--red-soft)", iconColor: "#b91c1c" },
-    green: { bar: "var(--green)", iconBg: "var(--green-soft)", iconColor: "#047857" },
-    neutral: { bar: "#94a3b8", iconBg: "#f1f5f9", iconColor: "#475569" },
+    brand: { bar: 'var(--brand)', iconBg: 'var(--brand-soft)', iconColor: '#2563eb' },
+    teal: { bar: 'var(--teal)', iconBg: 'var(--teal-soft)', iconColor: '#0f766e' },
+    amber: { bar: 'var(--amber)', iconBg: 'var(--amber-soft)', iconColor: '#b45309' },
+    red: { bar: 'var(--red)', iconBg: 'var(--red-soft)', iconColor: '#b91c1c' },
+    green: { bar: 'var(--green)', iconBg: 'var(--green-soft)', iconColor: '#047857' },
+    neutral: { bar: '#94a3b8', iconBg: '#f1f5f9', iconColor: '#475569' },
   }[accent];
 
   return (
     <div
       style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-lg)",
-        padding: "18px 20px",
-        boxShadow: "var(--shadow-xs)",
-        display: "flex",
-        flexDirection: "column",
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '18px 20px',
+        boxShadow: 'var(--shadow-xs)',
+        display: 'flex',
+        flexDirection: 'column',
         gap: 12,
-        position: "relative",
-        overflow: "hidden",
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <div
         style={{
-          position: "absolute",
+          position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
@@ -208,16 +200,14 @@ function Card({ label, value, accent = "brand", icon, sub }) {
           opacity: 0.85,
         }}
       />
-      <div
-        style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div
           style={{
             fontSize: 11.5,
             fontWeight: 600,
-            color: "var(--text-muted)",
+            color: 'var(--text-muted)',
             letterSpacing: 0.6,
-            textTransform: "uppercase",
+            textTransform: 'uppercase',
           }}
         >
           {label}
@@ -229,9 +219,9 @@ function Card({ label, value, accent = "brand", icon, sub }) {
             borderRadius: 8,
             background: accents.iconBg,
             color: accents.iconColor,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           {icon}
@@ -243,16 +233,14 @@ function Card({ label, value, accent = "brand", icon, sub }) {
         style={{
           fontSize: 26,
           fontWeight: 600,
-          color: "var(--text)",
+          color: 'var(--text)',
           letterSpacing: -0.3,
         }}
       >
         {value}
       </div>
 
-      {sub && (
-        <div style={{ fontSize: 12.5, color: "var(--text-muted)" }}>{sub}</div>
-      )}
+      {sub && <div style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{sub}</div>}
     </div>
   );
 }
@@ -313,11 +301,7 @@ function DbGlyph() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
       <ellipse cx="12" cy="6" rx="7" ry="2.5" stroke="currentColor" strokeWidth="1.6" />
-      <path
-        d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
+      <path d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6" stroke="currentColor" strokeWidth="1.6" />
       <path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   );

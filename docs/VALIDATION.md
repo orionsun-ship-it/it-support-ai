@@ -5,10 +5,10 @@ methodology, scenarios, results, and how to reproduce.
 
 We run **three** harnesses, each with a different purpose:
 
-| Harness                   | Run command   | Purpose                                                | Cost      | Determinism |
-| ------------------------- | ------------- | ------------------------------------------------------ | --------- | ----------- |
-| Deterministic routing     | `make test`   | Asserts every conditional edge in the orchestrator     | Free      | 100 %       |
-| MCP cross-transport proof | `make test-mcp` | Asserts MCP↔HTTP land in the same DB                  | Free      | 100 %       |
+| Harness                   | Run command     | Purpose                                               | Cost      | Determinism   |
+| ------------------------- | --------------- | ----------------------------------------------------- | --------- | ------------- |
+| Deterministic routing     | `make test`     | Asserts every conditional edge in the orchestrator    | Free      | 100 %         |
+| MCP cross-transport proof | `make test-mcp` | Asserts MCP↔HTTP land in the same DB                  | Free      | 100 %         |
 | Live-LLM accuracy         | `make test-llm` | Measures Claude's classification quality on real text | API spend | LLM-dependent |
 
 CI / pre-merge: run `make test` and `make test-mcp`. Both are
@@ -48,18 +48,18 @@ branch in the LangGraph orchestrator. For each scenario it:
 
 ### 1.2 Coverage — every branch is exercised
 
-| Routing branch                                                   | Scenario                          |
-| ---------------------------------------------------------------- | --------------------------------- |
-| intake → final_response (non-support)                            | `non_support_request`             |
-| intake → knowledge → final_response (KB strong, knowledge_question) | `kb_browser_cache`             |
-| knowledge → workflow (requires_automation, simulated)            | `password_reset_automation`, `account_unlock_automation`, `software_install_automation` |
-| knowledge → workflow (requires_automation, real subsystem)       | `urgent_vpn_outage_escalates`, `status_check_real_subsystem` |
-| knowledge → workflow (intent==ticket_request)                    | `explicit_ticket_request`         |
-| knowledge → escalation (user is stuck)                           | `weak_kb_user_gets_stuck`         |
-| knowledge → escalation (explicit human handoff)                  | `explicit_human_handoff`          |
-| workflow → escalation (severity=critical / urgency=high)         | `urgent_vpn_outage_escalates`     |
-| workflow → final_response (success, low severity)                | `password_reset_automation`, `software_install_automation` |
-| workflow → final_response (ticket created, not urgent)           | `explicit_ticket_request`, `status_check_real_subsystem` |
+| Routing branch                                                      | Scenario                                                                                |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| intake → final_response (non-support)                               | `non_support_request`                                                                   |
+| intake → knowledge → final_response (KB strong, knowledge_question) | `kb_browser_cache`                                                                      |
+| knowledge → workflow (requires_automation, simulated)               | `password_reset_automation`, `account_unlock_automation`, `software_install_automation` |
+| knowledge → workflow (requires_automation, real subsystem)          | `urgent_vpn_outage_escalates`, `status_check_real_subsystem`                            |
+| knowledge → workflow (intent==ticket_request)                       | `explicit_ticket_request`                                                               |
+| knowledge → escalation (user is stuck)                              | `weak_kb_user_gets_stuck`                                                               |
+| knowledge → escalation (explicit human handoff)                     | `explicit_human_handoff`                                                                |
+| workflow → escalation (severity=critical / urgency=high)            | `urgent_vpn_outage_escalates`                                                           |
+| workflow → final_response (success, low severity)                   | `password_reset_automation`, `software_install_automation`                              |
+| workflow → final_response (ticket created, not urgent)              | `explicit_ticket_request`, `status_check_real_subsystem`                                |
 
 ### 1.3 Latest results (checked in)
 
